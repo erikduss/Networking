@@ -9,6 +9,8 @@ public class ClientBehaviour : MonoBehaviour
     public NetworkConnection m_Connection;
     public bool Done;
 
+    private float timeLeft = 15;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -53,17 +55,24 @@ public class ClientBehaviour : MonoBehaviour
                 DataStreamWriter writer;
                 int result = m_Driver.BeginSend(NetworkPipeline.Null, m_Connection, out writer);
 
-                if (result == 0)
-                {
-
-                    writer.WriteUInt(value);
-                    m_Driver.EndSend(writer);
-                }
+                writer.WriteUInt(value);
+                m_Driver.EndSend(writer);
             }
             else if(cmd == NetworkEvent.Type.Data)
             {
-                uint value = stream.ReadUInt();
-                Debug.Log("Got the value = " + value + " back from the server");
+                GameEventType varType = (GameEventType)stream.ReadUInt();
+
+                if(varType == GameEventType.INT)
+                {
+                    int value = stream.ReadInt();
+                    Debug.Log("Got the value = " + value + " back from the server");
+                }
+                else if(varType == GameEventType.STRING)
+                {
+                    FixedString64 value = stream.ReadFixedString64();
+                    Debug.Log("Got the string = " + value + " back from the server");
+                }
+                
                 //Done = true;
                 //m_Connection.Disconnect(m_Driver);
                 //m_Connection = default(NetworkConnection);
@@ -74,5 +83,42 @@ public class ClientBehaviour : MonoBehaviour
                 m_Connection = default(NetworkConnection);
             }
         }
+
+        timeLeft -= Time.deltaTime;
+        if (timeLeft < 0)
+        {
+            SendEmpty();
+        }
+    }
+
+    public void SendEmpty()
+    {
+        DataStreamWriter writer;
+        int result = m_Driver.BeginSend(NetworkPipeline.Null, m_Connection, out writer);
+
+        writer.WriteUInt(0);
+        m_Driver.EndSend(writer);
+
+        timeLeft = 15;
+    }
+
+    public void SendInt(uint val)
+    {
+        DataStreamWriter writer;
+        int result = m_Driver.BeginSend(NetworkPipeline.Null, m_Connection, out writer);
+
+        writer.WriteUInt(2);
+        writer.WriteUInt(val);
+        m_Driver.EndSend(writer);
+    }
+
+    public void SendString(FixedString64 val)
+    {
+        DataStreamWriter writer;
+        int result = m_Driver.BeginSend(NetworkPipeline.Null, m_Connection, out writer);
+
+        writer.WriteUInt(1);
+        writer.WriteFixedString64(val);
+        m_Driver.EndSend(writer);
     }
 }

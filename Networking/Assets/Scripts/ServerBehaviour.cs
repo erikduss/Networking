@@ -3,11 +3,12 @@ using UnityEngine.Assertions;
 using Unity.Collections;
 using Unity.Networking.Transport;
 
-public enum GameEvent
+public enum GameEventType
 {
-
+    EMPTY,
+    STRING,
+    INT
 }
-
 
 public class ServerBehaviour : MonoBehaviour
 {
@@ -73,17 +74,57 @@ public class ServerBehaviour : MonoBehaviour
             {
                 if(cmd == NetworkEvent.Type.Data)
                 {
-                    uint number = stream.ReadUInt();
-                    Debug.Log("Got " + number + " from the Client adding + 2 to it.");
+                    GameEventType varType = (GameEventType)stream.ReadUInt();
 
-                    number += 2;
-
-                    DataStreamWriter writer;
-                    int result = m_Driver.BeginSend(NetworkPipeline.Null, m_Connections[i], out writer);
-
-                    if(result == 0)
+                    if(varType == GameEventType.EMPTY)
                     {
-                        writer.WriteUInt(number);
+                        Debug.Log("Received empty, ping ping.");
+
+                        DataStreamWriter writer;
+                        int result = m_Driver.BeginSend(NetworkPipeline.Null, m_Connections[i], out writer);
+
+                        writer.WriteUInt(0);
+                        writer.WriteUInt(0);
+                        m_Driver.EndSend(writer);
+                    }
+
+                    else if(varType == GameEventType.INT)
+                    {
+                        int number = stream.ReadInt();
+                        Debug.Log("Got " + number + " from the Client adding + 2 to it.");
+
+                        number += 2;
+
+                        DataStreamWriter writer;
+                        int result = m_Driver.BeginSend(NetworkPipeline.Null, m_Connections[i], out writer);
+
+                        writer.WriteUInt(2);
+                        writer.WriteInt(number);
+                        m_Driver.EndSend(writer);
+                    }
+                    else if (varType == GameEventType.STRING)
+                    {
+                        FixedString64 str;
+
+                        try
+                        {
+                            str = stream.ReadFixedString64();
+                        }
+                        catch
+                        {
+                            str = "Empty test";
+                        }
+
+                        
+                        Debug.Log("Got string " + str + " from the Client");
+
+                        str = "This is your return string";
+
+                        DataStreamWriter writer;
+                        int result = m_Driver.BeginSend(NetworkPipeline.Null, m_Connections[i], out writer);
+
+                        writer.WriteUInt(1);
+                        writer.WriteFixedString64(str);
                         m_Driver.EndSend(writer);
                     }
                 }
