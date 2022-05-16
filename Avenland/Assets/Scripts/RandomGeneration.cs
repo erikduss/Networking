@@ -2,14 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class RandomGeneration : MonoBehaviour
 {
     private float tileSize = 1.28f; //Every tile is 128x128px which translates to 1.28f in unity
 
     private int minDistBetweenDoors = 20;
-
     public int amountOfDoors = 0;
+
+    private int minDistanceBetweenEnemies = 10;
+    public int amountOfEnemies = 0;
 
     //Floor Tiles
     [SerializeField] private List<GameObject> floorTiles = new List<GameObject>();
@@ -36,13 +39,14 @@ public class RandomGeneration : MonoBehaviour
     [SerializeField] private List<GameObject> rightWalls = new List<GameObject>();
 
     [SerializeField] private List<GameObject> bottomWalls = new List<GameObject>();
-    
+
+    [SerializeField] private List<GameObject> enemyPrefabs = new List<GameObject>();
 
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log(amountOfDoors);
         minDistBetweenDoors = minDistBetweenDoors * amountOfDoors;
+        minDistanceBetweenEnemies = minDistanceBetweenEnemies * amountOfEnemies;
     }
 
     // Update is called once per frame
@@ -209,7 +213,6 @@ public class RandomGeneration : MonoBehaviour
             bool[] doorwayPlaced = new bool[amountOfDoors + 1];
 
             GameObject WallTileParent = new GameObject { name = "WallTileParent" };
-
             WallTileParent.transform.position = startPoint;
 
             GenerateDoors(WallTileParent, lengthX, lengthY);
@@ -439,6 +442,64 @@ public class RandomGeneration : MonoBehaviour
                     GameObject.Instantiate(FloorTile, FloorTile.transform.position, Quaternion.identity, FloorTileParent.transform);
                 }
             }
+
+            NavMeshSurface surface = FloorTileParent.AddComponent<NavMeshSurface>();
+            surface.BuildNavMesh();
         }
+    }
+
+    public List<EnemyController> GenerateEnemies(float lengthX, float lengthY, Vector2 playerLocation)
+    {
+        List<EnemyController> tempEnemyList = new List<EnemyController>();
+
+        GameObject EnemyParent = new GameObject { name = "EnemyParent" };
+        EnemyParent.transform.position = Vector3.zero;
+
+        for (int i = 0; i < amountOfEnemies; i++)
+        {
+            int randX = (int)Random.Range(3, (lengthX - 3));
+            int randY = (int)Random.Range(3, (lengthY - 3));
+
+            bool canSpawnOnPickedLocation = true;
+
+            if (Mathf.Abs(playerLocation.x - randX) < (minDistanceBetweenEnemies/2) && Mathf.Abs(playerLocation.y - -randY) < (minDistanceBetweenEnemies / 2))
+            {
+                canSpawnOnPickedLocation = false;
+            }
+
+            if (tempEnemyList.Count > 0)
+            {
+                foreach (EnemyController enemy in tempEnemyList)
+                {
+                    if (Mathf.Abs(enemy.enemyLocation.x - randX) < minDistanceBetweenEnemies && Mathf.Abs(enemy.enemyLocation.y - randY) < minDistanceBetweenEnemies)
+                    {
+                        canSpawnOnPickedLocation = false;
+                    }
+                }
+            }
+
+            if (canSpawnOnPickedLocation)
+            {
+                int rand = Random.Range(0, enemyPrefabs.Count);
+
+                GameObject tempEnemy = enemyPrefabs[rand];
+                tempEnemy.name = "Enemy_" + i;
+
+                EnemyController enemyCont = tempEnemy.GetComponent<EnemyController>();
+                enemyCont.enemyLocation = new Vector2(randX,randY);
+
+                tempEnemy.transform.position = new Vector3((randX * 1.28f), (randY * -1.28f), 0);
+
+                GameObject objToAdd = GameObject.Instantiate(tempEnemy, tempEnemy.transform.position, Quaternion.identity, EnemyParent.transform);
+
+                tempEnemyList.Add(objToAdd.GetComponent<EnemyController>());
+            }
+            else
+            {
+                i--;
+            }
+        }
+
+        return tempEnemyList;
     }
 }

@@ -14,6 +14,7 @@ public class GameSettings : MonoBehaviour
     public int amountOfPlayers;
 
     public List<SpecializationType> chosenSpecializations;
+    public List<string> playerNames;
 
     // Start is called before the first frame update
     void Start()

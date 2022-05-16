@@ -7,6 +7,8 @@ TagManager:
   - GameOptions
   - GameOptionsTest
   - LevelGenerator
+  - Enemy
+  - Detection
   layers:
   - Default
   - TransparentFX
@@ -43,4 +45,7 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: PlayerCharacters
+    uniqueID: 2620198213
     locked: 0
