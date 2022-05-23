@@ -9,6 +9,7 @@ TagManager:
   - LevelGenerator
   - Enemy
   - Detection
+  - ChatCanvas
   layers:
   - Default
   - TransparentFX

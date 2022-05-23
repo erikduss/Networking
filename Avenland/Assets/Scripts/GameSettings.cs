@@ -1,6 +1,8 @@
+using ChatClientExample;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameSettings : MonoBehaviour
 {
@@ -16,6 +18,11 @@ public class GameSettings : MonoBehaviour
     public List<SpecializationType> chosenSpecializations;
     public List<string> playerNames;
 
+    private Server hostServer;
+    private NetworkManager hostNetworkManager;
+
+    private int lastLoadedSceneID = 0;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -25,7 +32,10 @@ public class GameSettings : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if(SceneManager.GetActiveScene().buildIndex != lastLoadedSceneID && isHost)
+        {
+            UpdateServerInfo();
+        }
     }
 
     public bool ValidSettings()
@@ -35,5 +45,34 @@ public class GameSettings : MonoBehaviour
             return false;
         }
         else return true;
+    }
+
+    public void SetUpServer()
+    {
+        if (isHost)
+        {
+            hostServer = gameObject.AddComponent<Server>();
+            hostNetworkManager = gameObject.AddComponent<NetworkManager>();
+            hostServer.networkManager = hostNetworkManager;
+        }
+    }
+
+    private void UpdateServerInfo()
+    {
+        switch (SceneManager.GetActiveScene().buildIndex)
+        {
+            case 0:
+                
+                break;
+            case 1:
+                    hostServer.chat = GameObject.FindGameObjectWithTag("ChatCanvas").GetComponent<ChatCanvas>();
+                break;
+            case 2:
+                    hostServer.chat = GameObject.FindGameObjectWithTag("ChatCanvas").GetComponent<ChatCanvas>();
+                break;
+            case 3:
+                    hostServer.chat = GameObject.FindGameObjectWithTag("ChatCanvas").GetComponent<ChatCanvas>();
+                break;
+        }
     }
 }

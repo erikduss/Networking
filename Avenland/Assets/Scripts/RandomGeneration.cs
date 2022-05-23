@@ -442,9 +442,6 @@ public class RandomGeneration : MonoBehaviour
                     GameObject.Instantiate(FloorTile, FloorTile.transform.position, Quaternion.identity, FloorTileParent.transform);
                 }
             }
-
-            NavMeshSurface surface = FloorTileParent.AddComponent<NavMeshSurface>();
-            surface.BuildNavMesh();
         }
     }
 
