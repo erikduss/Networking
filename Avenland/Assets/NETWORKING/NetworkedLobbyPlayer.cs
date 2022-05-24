@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace ChatClientExample
 {
@@ -12,6 +13,7 @@ namespace ChatClientExample
 
 		public string playerName = "Player Name";
 		[SerializeField] private TextMeshProUGUI playerNameText;
+		[SerializeField] private Image readyImage;
 
 		Client client;
 		Server server;
@@ -36,33 +38,62 @@ namespace ChatClientExample
 		}
 
 		private void Update() {
-			if (isLocal) 
+			
+		}
+
+		public void SendStatusUpdate(uint stat)
+        {
+			if (isLocal)
 			{
 				//Send to the server if player is ready
-				/*
-				InputUpdateMessage inputMsg = new InputUpdateMessage {
-					input = update,
-					networkId = this.networkId
+				ReadyStatusUpdateMessage readyMsg = new ReadyStatusUpdateMessage
+				{
+					networkId = this.networkId,
+					status = stat
 				};
-				client.SendPackedMessage(inputMsg);*/
+				client.SendPackedMessage(readyMsg);
 			}
 
-			if (isServer) 
+			if (isServer)
 			{
 				//Send the ready status to all clients
-				/*
-				// TODO: Send position update to all clients (maybe not every frame!)
 				if (Time.frameCount % 3 == 0) { // assuming 60fps, so 20fps motion updates
 												// We could consider sending this over a non-reliable pipeline
-					UpdatePositionMessage posMsg = new UpdatePositionMessage {
+					ReadyStatusUpdateMessage readyMsg = new ReadyStatusUpdateMessage
+					{
 						networkId = this.networkId,
-						position = transform.position,
-						rotation = transform.eulerAngles
+						status = stat
 					};
 
-					server.SendBroadcast(posMsg);
-				}*/
+					server.SendBroadcast(readyMsg);
+				}
 			}
 		}
+
+		public void SetPlayerReadyStatus(bool status)
+        {
+			isReady = status;
+
+            if (isReady)
+            {
+				readyImage.color = Color.green;
+            }
+            else
+            {
+				readyImage.color = Color.white;
+            }
+        }
+
+		public void UpdateReadyStatus(uint response)
+        {
+			if (response == 1)
+			{
+				SetPlayerReadyStatus(true);
+			}
+            else
+            {
+				SetPlayerReadyStatus(false);
+			}
+        }
 	}
 }

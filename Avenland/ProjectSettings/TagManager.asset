@@ -11,6 +11,7 @@ TagManager:
   - Detection
   - ChatCanvas
   - LobbyPlayerPanel
+  - LobbyPlayer
   layers:
   - Default
   - TransparentFX

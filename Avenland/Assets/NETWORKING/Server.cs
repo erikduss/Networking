@@ -21,7 +21,8 @@ namespace ChatClientExample {
         NETWORK_UPDATE_POSITION,
         INPUT_UPDATE,                        // uint networkId, InputUpdate (float, float, bool)
         PING,
-        PONG
+        PONG,
+        READY_STATUS_UPDATE
     }
 
     public enum MessageType
@@ -50,7 +51,8 @@ namespace ChatClientExample {
             { NetworkMessageType.NETWORK_UPDATE_POSITION,   typeof(UpdatePositionMessage) },
             { NetworkMessageType.INPUT_UPDATE,              typeof(InputUpdateMessage) },
             { NetworkMessageType.PING,                      typeof(PingMessage) },
-            { NetworkMessageType.PONG,                      typeof(PongMessage) }
+            { NetworkMessageType.PONG,                      typeof(PongMessage) },
+            { NetworkMessageType.READY_STATUS_UPDATE,       typeof(ReadyStatusUpdateMessage) }
         };
     }
 
@@ -61,6 +63,7 @@ namespace ChatClientExample {
             { NetworkMessageType.CHAT_MESSAGE,  HandleClientMessage },
             { NetworkMessageType.CHAT_QUIT,     HandleClientExit },
             { NetworkMessageType.INPUT_UPDATE,  HandleClientInput },
+            {NetworkMessageType.READY_STATUS_UPDATE, HandleClientReadyStatus },
             { NetworkMessageType.PONG,          HandleClientPong }
         };
 
@@ -394,6 +397,28 @@ namespace ChatClientExample {
             }
             else {
                 Debug.LogError("Received player input from unlisted connection");
+            }
+        }
+
+        static void HandleClientReadyStatus(Server serv, NetworkConnection connection, MessageHeader header)
+        {
+            ReadyStatusUpdateMessage inputMsg = header as ReadyStatusUpdateMessage;
+
+            if (serv.lobbyPlayerInstances.ContainsKey(connection))
+            {
+                if (serv.lobbyPlayerInstances[connection].networkId == inputMsg.networkId)
+                {
+                    //does not yet contain input
+                    serv.lobbyPlayerInstances[connection].UpdateReadyStatus(inputMsg.status);
+                }
+                else
+                {
+                    Debug.LogError("NetworkID Mismatch for Player Input");
+                }
+            }
+            else
+            {
+                Debug.LogError("Received player ready status from unlisted connection");
             }
         }
 
