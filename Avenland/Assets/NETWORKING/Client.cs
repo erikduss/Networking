@@ -18,7 +18,8 @@ namespace ChatClientExample
             { NetworkMessageType.NETWORK_DESTROY,           HandleNetworkDestroy },           // uint networkId
             { NetworkMessageType.NETWORK_UPDATE_POSITION,   HandleNetworkUpdate },            // uint networkId, vector3 position, vector3 rotation
             { NetworkMessageType.CHAT_MESSAGE,              HandleChatMessage },
-            { NetworkMessageType.PING,                      HandlePing }
+            { NetworkMessageType.PING,                      HandlePing },
+            {NetworkMessageType.READY_STATUS_UPDATE,        HandleReadyStatusUpdare }
         };
 
         public NetworkDriver m_Driver;
@@ -160,6 +161,22 @@ namespace ChatClientExample
         //      - network spawn             (WIP)
         //      - network destroy           (WIP)
         //      - network update            (WIP)
+
+        static void HandleReadyStatusUpdare(Client client, MessageHeader header)
+        {
+            ReadyStatusUpdateMessage posMsg = header as ReadyStatusUpdateMessage;
+
+            GameObject obj;
+            if (client.networkManager.GetReference(posMsg.networkId, out obj))
+            {
+                NetworkedLobbyPlayer playerStat = obj.GetComponent<NetworkedLobbyPlayer>();
+                playerStat.UpdateReadyStatus(posMsg.status);
+            }
+            else
+            {
+                Debug.LogError($"Could not find object with id {posMsg.networkId}!");
+            }
+        }
 
         static void HandleServerHandshakeResponse(Client client, MessageHeader header) {
             HandshakeResponseMessage response = header as HandshakeResponseMessage;
