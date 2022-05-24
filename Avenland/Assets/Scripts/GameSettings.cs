@@ -52,7 +52,7 @@ public class GameSettings : MonoBehaviour
         if (isHost)
         {
             hostServer = gameObject.AddComponent<Server>();
-            hostNetworkManager = gameObject.AddComponent<NetworkManager>();
+            hostNetworkManager = gameObject.GetComponent<NetworkManager>();
             hostServer.networkManager = hostNetworkManager;
         }
     }

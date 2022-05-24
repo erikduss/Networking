@@ -36,6 +36,7 @@ namespace ChatClientExample
             }
             Client.clientName = name;
             Client.isServer = true;
+            settings.playerNames.Add(name);
 
             SceneManager.LoadScene(serverScene);
         }
@@ -57,6 +58,7 @@ namespace ChatClientExample
                 }
             }
             Client.clientName = name;
+            settings.playerNames.Add(name);
 
             settings.isHost = false;
 

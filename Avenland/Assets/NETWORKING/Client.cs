@@ -25,7 +25,8 @@ namespace ChatClientExample
         public NetworkPipeline m_Pipeline;
         public NetworkConnection m_Connection;
         public bool Done;
-        public NetworkManager networkManager;
+
+        private NetworkManager networkManager;
 
         public ChatCanvas chatCanvas;
 
@@ -49,6 +50,8 @@ namespace ChatClientExample
             var endpoint = NetworkEndPoint.Parse(serverIP, 9000, NetworkFamily.Ipv4);
             endpoint.Port = 1511;
             m_Connection = m_Driver.Connect(endpoint);
+
+            networkManager = GameObject.FindGameObjectWithTag("GameOptions").GetComponent<NetworkManager>();
         }
 
         // No collections list this time...
@@ -114,6 +117,11 @@ namespace ChatClientExample
             }
         }
 
+        public string GetName()
+        {
+            return clientName;
+        }
+
         public TMP_InputField input;
 
         // UI FUNCTIONS (0 refs)
@@ -157,13 +165,22 @@ namespace ChatClientExample
             HandshakeResponseMessage response = header as HandshakeResponseMessage;
 
             GameObject obj;
-            if (client.networkManager.SpawnWithId(NetworkSpawnObject.PLAYER, response.networkId, out obj)) {
-                NetworkedPlayer player = obj.GetComponent<NetworkedPlayer>();
-                player.isLocal = true;
-                player.isServer = false;
-            }
-            else {
-                Debug.LogError("Could not spawn player!");
+
+            if (!isServer)
+            {
+                if (client.networkManager.SpawnWithId(NetworkSpawnObject.PLAYERLOBBY, response.networkId, out obj))
+                {
+                    NetworkedLobbyPlayer player = obj.GetComponent<NetworkedLobbyPlayer>();
+                    player.isLocal = true;
+                    player.isServer = false;
+                    player.playerName = client.GetName();
+                    GameObject parentObj = GameObject.FindGameObjectWithTag("LobbyPlayerPanel");
+                    player.transform.SetParent(parentObj.transform);
+                }
+                else
+                {
+                    Debug.LogError("Could not spawn player!");
+                }
             }
         }
 
@@ -171,8 +188,25 @@ namespace ChatClientExample
             SpawnMessage spawnMsg = header as SpawnMessage;
 
             GameObject obj;
-            if (!client.networkManager.SpawnWithId(spawnMsg.objectType, spawnMsg.networkId, out obj)) {
-                Debug.LogError($"Could not spawn {spawnMsg.objectType} for id {spawnMsg.networkId}!");
+
+            if (!isServer)
+            {
+                if (client.networkManager.SpawnWithId(spawnMsg.objectType, spawnMsg.networkId, out obj))
+                {
+                    //This is required to set the parent and the name of the non local player correctly in the client scene
+                    NetworkedLobbyPlayer nonLocalPlayer = obj.GetComponent<NetworkedLobbyPlayer>();
+                    if (nonLocalPlayer != null)
+                    {
+                        //Debug.Log(spawnMsg.playerName.ToString());
+                        nonLocalPlayer.playerName = spawnMsg.playerName.ToString();
+                        GameObject parentObj = GameObject.FindGameObjectWithTag("LobbyPlayerPanel");
+                        nonLocalPlayer.transform.SetParent(parentObj.transform);
+                    }
+                }
+                else
+                {
+                    Debug.LogError($"Could not spawn {spawnMsg.objectType} for id {spawnMsg.networkId}!");
+                }
             }
         }
 

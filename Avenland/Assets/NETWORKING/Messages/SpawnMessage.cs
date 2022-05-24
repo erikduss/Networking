@@ -15,6 +15,9 @@ namespace ChatClientExample
 
 		public NetworkSpawnObject objectType;
 		public uint networkId;
+
+		public Unity.Collections.FixedString128Bytes playerName;
+
 		public Vector3 position = Vector3.zero;
 		public Vector3 rotation = Vector3.zero;
 
@@ -24,6 +27,8 @@ namespace ChatClientExample
 			
 			writer.WriteUInt(networkId);
 			writer.WriteUInt((uint)objectType);
+
+			writer.WriteFixedString128(playerName);
 
 			writer.WriteFloat(position.x);
 			writer.WriteFloat(position.y);
@@ -40,6 +45,8 @@ namespace ChatClientExample
 
 			networkId = reader.ReadUInt();
 			objectType = (NetworkSpawnObject)reader.ReadUInt();
+
+			playerName = reader.ReadFixedString128();
 
 			position.x = reader.ReadFloat();
 			position.y = reader.ReadFloat();
