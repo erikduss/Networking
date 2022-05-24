@@ -19,7 +19,7 @@ namespace ChatClientExample
             { NetworkMessageType.NETWORK_UPDATE_POSITION,   HandleNetworkUpdate },            // uint networkId, vector3 position, vector3 rotation
             { NetworkMessageType.CHAT_MESSAGE,              HandleChatMessage },
             { NetworkMessageType.PING,                      HandlePing },
-            {NetworkMessageType.READY_STATUS_UPDATE,        HandleReadyStatusUpdare }
+            {NetworkMessageType.READY_STATUS_UPDATE,        HandleReadyStatusUpdate }
         };
 
         public NetworkDriver m_Driver;
@@ -162,7 +162,7 @@ namespace ChatClientExample
         //      - network destroy           (WIP)
         //      - network update            (WIP)
 
-        static void HandleReadyStatusUpdare(Client client, MessageHeader header)
+        static void HandleReadyStatusUpdate(Client client, MessageHeader header)
         {
             ReadyStatusUpdateMessage posMsg = header as ReadyStatusUpdateMessage;
 

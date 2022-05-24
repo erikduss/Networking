@@ -17,6 +17,7 @@ namespace ChatClientExample
 
 		Client client;
 		Server server;
+		LobbyManager lobbyManager;
 
 		public bool isReady = false;
 
@@ -28,6 +29,7 @@ namespace ChatClientExample
 			if ( isServer ) 
 			{
 				server = FindObjectOfType<Server>();
+				lobbyManager = FindObjectOfType<LobbyManager>();
 			}
 
 			playerNameText.text = playerName;
@@ -57,22 +59,24 @@ namespace ChatClientExample
 			if (isServer)
 			{
 				//Send the ready status to all clients
-				if (Time.frameCount % 3 == 0) { // assuming 60fps, so 20fps motion updates
-												// We could consider sending this over a non-reliable pipeline
-					ReadyStatusUpdateMessage readyMsg = new ReadyStatusUpdateMessage
-					{
-						networkId = this.networkId,
-						status = stat
-					};
+				ReadyStatusUpdateMessage readyMsg = new ReadyStatusUpdateMessage
+				{
+					networkId = this.networkId,
+					status = stat
+				};
 
-					server.SendBroadcast(readyMsg);
-				}
+				server.SendBroadcast(readyMsg);
 			}
 		}
 
 		public void SetPlayerReadyStatus(bool status)
         {
 			isReady = status;
+
+            if (isServer)
+            {
+				lobbyManager.CheckReadyValidState(); //THIS DOESNT PREVENT THE HOST FROM CLICKING IT IF THE OTHER PLAYER IS NOT READY AFTER BEING READY BEFORE
+			}
 
             if (isReady)
             {

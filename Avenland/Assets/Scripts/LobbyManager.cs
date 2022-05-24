@@ -48,7 +48,25 @@ public class LobbyManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
+    }
+
+    public void CheckReadyValidState()
+    {
+        if (settings.isHost)
+        {
+            List<GameObject> lobbyPlayers = new List<GameObject>();
+            lobbyPlayers.AddRange(GameObject.FindGameObjectsWithTag("LobbyPlayer"));
+
+            bool canStart = true;
+
+            foreach(GameObject ob in lobbyPlayers)
+            {
+                if (!ob.GetComponent<NetworkedLobbyPlayer>().isReady) canStart = false;
+            }
+
+            SetStartGameButton(canStart);
+        }
     }
 
     public void ReadyButtonClicked()

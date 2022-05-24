@@ -408,8 +408,8 @@ namespace ChatClientExample {
             {
                 if (serv.lobbyPlayerInstances[connection].networkId == inputMsg.networkId)
                 {
-                    //does not yet contain input
                     serv.lobbyPlayerInstances[connection].UpdateReadyStatus(inputMsg.status);
+                    serv.SendBroadcast(inputMsg);
                 }
                 else
                 {

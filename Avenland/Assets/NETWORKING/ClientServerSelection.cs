@@ -23,7 +23,8 @@ namespace ChatClientExample
             settings.isHost = true;
             settings.SetUpServer();
 
-            Client.serverIP = "127.0.0.1";
+            Client.serverIP = "127.0.0.1"; //Only this works
+            //Client.serverIP = "192.168.2.28";
 
             string name = nameHostInput.text;
             if (string.IsNullOrEmpty(nameHostInput.text))
