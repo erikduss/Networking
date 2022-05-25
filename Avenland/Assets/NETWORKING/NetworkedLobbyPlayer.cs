@@ -101,10 +101,10 @@ namespace ChatClientExample
         {
 			isReady = status;
 
-            if (isServer)
+            /*if (isServer)
             {
 				lobbyManager.CheckReadyValidState(); //THIS DOESNT PREVENT THE HOST FROM CLICKING IT IF THE OTHER PLAYER IS NOT READY AFTER BEING READY BEFORE
-			}
+			}*/
 
             if (isReady)
             {

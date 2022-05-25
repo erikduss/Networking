@@ -8,8 +8,8 @@ namespace ChatClientExample
 {
     public class ChatCanvas : MonoBehaviour
     {
-        public static Color chatColor = new Color(.85f, .85f, .85f);
-        public static Color joinColor = new Color(.25f, .95f, .25f);
+        public static Color chatColor = new Color(0f, 0f, 0f); //old 0.85, 0.85, 0.85
+        public static Color joinColor = new Color(0f, 1f, 0f); //old 0.25, 0.95, 0.25
         public static Color leaveColor = new Color(.95f, .25f, .25f);
 
         public GameObject textPrefab;

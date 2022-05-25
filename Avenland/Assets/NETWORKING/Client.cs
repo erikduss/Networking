@@ -172,6 +172,10 @@ namespace ChatClientExample
             {
                 NetworkedLobbyPlayer playerStat = obj.GetComponent<NetworkedLobbyPlayer>();
                 playerStat.UpdateReadyStatus(posMsg.status);
+                if (isServer)
+                {
+                    GameObject.FindObjectOfType<LobbyManager>().CheckReadyValidState();
+                }
             }
             else
             {
@@ -216,6 +220,13 @@ namespace ChatClientExample
                     Debug.LogError("Could not spawn player!");
                 }
             }
+            else
+            {
+                if (isServer)
+                {
+                    GameObject.FindObjectOfType<LobbyManager>().CheckReadyValidState();
+                }
+            }
         }
 
         static void HandleNetworkSpawn(Client client, MessageHeader header) {
@@ -242,12 +253,24 @@ namespace ChatClientExample
                     Debug.LogError($"Could not spawn {spawnMsg.objectType} for id {spawnMsg.networkId}!");
                 }
             }
+            else
+            {
+                if (isServer)
+                {
+                    GameObject.FindObjectOfType<LobbyManager>().CheckReadyValidState();
+                }
+            }
         }
 
         static void HandleNetworkDestroy(Client client, MessageHeader header) {
             DestroyMessage destroyMsg = header as DestroyMessage;
             if (!client.networkManager.DestroyWithId(destroyMsg.networkId)) {
                 Debug.LogError($"Could not destroy object with id {destroyMsg.networkId}!");
+            }
+
+            if (isServer)
+            {
+                GameObject.FindObjectOfType<LobbyManager>().CheckReadyValidState();
             }
         }
 
