@@ -16,6 +16,8 @@ public class LobbyManager : MonoBehaviour
     [SerializeField] private Text readyButtonText;
     [SerializeField] private Button startGameButton;
 
+    [SerializeField] private Text specializationButtonText;
+
     private GameSettings settings;
 
     private bool readyState = false;
@@ -89,6 +91,33 @@ public class LobbyManager : MonoBehaviour
             readyButtonImage.color = Color.red;
             readyButtonText.text = "Not Ready";
             localPlayer.SendStatusUpdate(0);
+        }
+    }
+
+    public void SpecializationConfirmButtonClicked(int spec)
+    {
+        if (localPlayer == null)
+        {
+            localPlayer = GameObject.FindGameObjectsWithTag("LobbyPlayer").Where(x => x.GetComponent<NetworkedLobbyPlayer>().isLocal = true).First().GetComponent<NetworkedLobbyPlayer>();
+        }
+
+        localPlayer.SendSpecializationUpdate((uint)spec);
+
+        if(spec == (int)SpecializationType.Warrior)
+        {
+            specializationButtonText.text = "Warrior (click to change)";
+        }
+        else if (spec == (int)SpecializationType.Mage)
+        {
+            specializationButtonText.text = "Mage (click to change)";
+        }
+        else if(spec == (int)SpecializationType.Rogue)
+        {
+            specializationButtonText.text = "Rogue (click to change)";
+        }
+        else if(spec == (int)SpecializationType.Shaman)
+        {
+            specializationButtonText.text = "Shaman (click to change)";
         }
     }
 

@@ -17,4 +17,9 @@ public class DontDestroyOnLoad : MonoBehaviour
 
         DontDestroyOnLoad(this.gameObject);
     }
+
+    public void ExitGame()
+    {
+        Application.Quit();
+    }
 }

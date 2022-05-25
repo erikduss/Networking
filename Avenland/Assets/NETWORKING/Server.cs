@@ -22,7 +22,8 @@ namespace ChatClientExample {
         INPUT_UPDATE,                        // uint networkId, InputUpdate (float, float, bool)
         PING,
         PONG,
-        READY_STATUS_UPDATE
+        READY_STATUS_UPDATE,
+        SPECIALIZATION_UPDATE
     }
 
     public enum MessageType
@@ -52,7 +53,8 @@ namespace ChatClientExample {
             { NetworkMessageType.INPUT_UPDATE,              typeof(InputUpdateMessage) },
             { NetworkMessageType.PING,                      typeof(PingMessage) },
             { NetworkMessageType.PONG,                      typeof(PongMessage) },
-            { NetworkMessageType.READY_STATUS_UPDATE,       typeof(ReadyStatusUpdateMessage) }
+            { NetworkMessageType.READY_STATUS_UPDATE,       typeof(ReadyStatusUpdateMessage) },
+            {NetworkMessageType.SPECIALIZATION_UPDATE,      typeof(SpecializationUpdateMessage) }
         };
     }
 
@@ -63,7 +65,8 @@ namespace ChatClientExample {
             { NetworkMessageType.CHAT_MESSAGE,  HandleClientMessage },
             { NetworkMessageType.CHAT_QUIT,     HandleClientExit },
             { NetworkMessageType.INPUT_UPDATE,  HandleClientInput },
-            {NetworkMessageType.READY_STATUS_UPDATE, HandleClientReadyStatus },
+            { NetworkMessageType.READY_STATUS_UPDATE, HandleClientReadyStatus },
+            { NetworkMessageType.SPECIALIZATION_UPDATE, HandleClientSpecialization },
             { NetworkMessageType.PONG,          HandleClientPong }
         };
 
@@ -410,6 +413,28 @@ namespace ChatClientExample {
                 {
                     serv.lobbyPlayerInstances[connection].UpdateReadyStatus(inputMsg.status);
                     serv.SendBroadcast(inputMsg);
+                }
+                else
+                {
+                    Debug.LogError("NetworkID Mismatch for Player Input");
+                }
+            }
+            else
+            {
+                Debug.LogError("Received player ready status from unlisted connection");
+            }
+        }
+
+        static void HandleClientSpecialization(Server serv, NetworkConnection connection, MessageHeader header)
+        {
+            SpecializationUpdateMessage specMsg = header as SpecializationUpdateMessage;
+
+            if (serv.lobbyPlayerInstances.ContainsKey(connection))
+            {
+                if (serv.lobbyPlayerInstances[connection].networkId == specMsg.networkId)
+                {
+                    serv.lobbyPlayerInstances[connection].UpdateSpecialization(specMsg.specialization);
+                    serv.SendBroadcast(specMsg);
                 }
                 else
                 {

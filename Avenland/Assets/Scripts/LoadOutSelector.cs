@@ -12,6 +12,8 @@ public class LoadOutSelector : MonoBehaviour
    
     private SpecializationType selectedSpec = SpecializationType.NONE;
 
+    [SerializeField] private LobbyManager lobbyManager;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -57,6 +59,6 @@ public class LoadOutSelector : MonoBehaviour
             return;
         }
 
-        Debug.Log(selectedSpec.ToString());
+        lobbyManager.SpecializationConfirmButtonClicked(((int)selectedSpec));
     }
 }

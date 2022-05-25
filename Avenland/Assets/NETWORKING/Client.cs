@@ -19,7 +19,8 @@ namespace ChatClientExample
             { NetworkMessageType.NETWORK_UPDATE_POSITION,   HandleNetworkUpdate },            // uint networkId, vector3 position, vector3 rotation
             { NetworkMessageType.CHAT_MESSAGE,              HandleChatMessage },
             { NetworkMessageType.PING,                      HandlePing },
-            {NetworkMessageType.READY_STATUS_UPDATE,        HandleReadyStatusUpdate }
+            { NetworkMessageType.READY_STATUS_UPDATE,        HandleReadyStatusUpdate },
+            { NetworkMessageType.SPECIALIZATION_UPDATE,      HandleSpecializationUpdate }
         };
 
         public NetworkDriver m_Driver;
@@ -175,6 +176,22 @@ namespace ChatClientExample
             else
             {
                 Debug.LogError($"Could not find object with id {posMsg.networkId}!");
+            }
+        }
+
+        static void HandleSpecializationUpdate(Client client, MessageHeader header)
+        {
+            SpecializationUpdateMessage specMsg = header as SpecializationUpdateMessage;
+
+            GameObject obj;
+            if (client.networkManager.GetReference(specMsg.networkId, out obj))
+            {
+                NetworkedLobbyPlayer playerStat = obj.GetComponent<NetworkedLobbyPlayer>();
+                playerStat.UpdateSpecialization(specMsg.specialization);
+            }
+            else
+            {
+                Debug.LogError($"Could not find object with id {specMsg.networkId}!");
             }
         }
 

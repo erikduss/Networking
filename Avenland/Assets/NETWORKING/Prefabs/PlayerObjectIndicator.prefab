@@ -305,6 +305,12 @@ MonoBehaviour:
   playerName: Player Name
   playerNameText: {fileID: 4840976124988834245}
   readyImage: {fileID: 8011789746834054106}
+  playerPortrait: {fileID: 4840976126494653174}
+  playerPortraitSprites:
+  - {fileID: 21300000, guid: 815dec8f1f0ee9d4ca394bd59abcc342, type: 3}
+  - {fileID: 21300000, guid: ceb3d96c5763d214594d4b43a808b6f6, type: 3}
+  - {fileID: 21300000, guid: d3976eb3d915e4e42ba61eb64d450f7b, type: 3}
+  - {fileID: 21300000, guid: 7cdc3a270704d684db2d7e95b3b50e5a, type: 3}
   isReady: 0
 --- !u!1 &4840976126062252253
 GameObject:
