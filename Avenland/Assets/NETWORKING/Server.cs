@@ -22,6 +22,7 @@ namespace ChatClientExample {
         INPUT_UPDATE,                        // uint networkId, InputUpdate (float, float, bool)
         PING,
         PONG,
+        RPC,
         READY_STATUS_UPDATE,
         SPECIALIZATION_UPDATE
     }
@@ -54,7 +55,8 @@ namespace ChatClientExample {
             { NetworkMessageType.PING,                      typeof(PingMessage) },
             { NetworkMessageType.PONG,                      typeof(PongMessage) },
             { NetworkMessageType.READY_STATUS_UPDATE,       typeof(ReadyStatusUpdateMessage) },
-            {NetworkMessageType.SPECIALIZATION_UPDATE,      typeof(SpecializationUpdateMessage) }
+            { NetworkMessageType.SPECIALIZATION_UPDATE,     typeof(SpecializationUpdateMessage) },
+            { NetworkMessageType.RPC,                       typeof(RPCMessage) }
         };
     }
 
@@ -250,7 +252,23 @@ namespace ChatClientExample {
         //  - Client chat message               (DONE)
         //  - Client chat exit                  (DONE)
         //  - Input update
-        
+
+        static void HandleRPC(Server serv, MessageHeader header)
+        {
+            RPCMessage msg = header as RPCMessage;
+
+            // try to call the function
+            try
+            {
+                msg.mInfo.Invoke(msg.target, msg.data);
+            }
+            catch (System.Exception e)
+            {
+                Debug.Log(e.Message);
+                Debug.Log(e.StackTrace);
+            }
+        }
+
         static void HandleClientHandshake(Server serv, NetworkConnection connection, MessageHeader header) {
             HandshakeMessage message = header as HandshakeMessage;
 

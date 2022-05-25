@@ -53,6 +53,31 @@ public class LobbyManager : MonoBehaviour
 
     }
 
+    public void StartGame()
+    {
+        if (settings.isHost)
+        {
+            //RPC wont work, RPC is meant for calling functions on networked entities like player objects. Will be useful for moving the player to a specific location in game scene
+
+            //Instead of an RPC message, try to send a regular message(s) to ->
+            // - Disable user input on their client?
+            // - update players their option
+            // - load into the game scene
+
+            //Good to seperate these into individual messages because these features are useful for other game elements
+            //(Disable input -> turn based, only the player that has the turn can interact)
+            //(update player options -> maybe a future mechanic to change spec)
+            //(loading into different scenes)
+
+
+            //RPCMessage rpcMsg = new RPCMessage
+            //{
+            //    networkId = localPlayer.networkId
+            //};
+            //client.SendPackedMessage(rpcMsg);
+        }
+    }
+
     public void CheckReadyValidState()
     {
         if (settings.isHost)

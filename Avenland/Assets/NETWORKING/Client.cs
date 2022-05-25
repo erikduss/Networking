@@ -19,8 +19,9 @@ namespace ChatClientExample
             { NetworkMessageType.NETWORK_UPDATE_POSITION,   HandleNetworkUpdate },            // uint networkId, vector3 position, vector3 rotation
             { NetworkMessageType.CHAT_MESSAGE,              HandleChatMessage },
             { NetworkMessageType.PING,                      HandlePing },
-            { NetworkMessageType.READY_STATUS_UPDATE,        HandleReadyStatusUpdate },
-            { NetworkMessageType.SPECIALIZATION_UPDATE,      HandleSpecializationUpdate }
+            { NetworkMessageType.READY_STATUS_UPDATE,       HandleReadyStatusUpdate },
+            { NetworkMessageType.SPECIALIZATION_UPDATE,     HandleSpecializationUpdate },
+            { NetworkMessageType.RPC,                       HandleRPC }
         };
 
         public NetworkDriver m_Driver;
@@ -163,6 +164,21 @@ namespace ChatClientExample
         //      - network destroy           (WIP)
         //      - network update            (WIP)
 
+        static void HandleRPC(Client client, MessageHeader header)
+        {
+            RPCMessage msg = header as RPCMessage;
+
+            // try to call the function
+            try
+            {
+                msg.mInfo.Invoke(msg.target, msg.data);
+            }
+            catch (System.Exception e)
+            {
+                Debug.Log(e.Message);
+                Debug.Log(e.StackTrace);
+            }
+        }
         static void HandleReadyStatusUpdate(Client client, MessageHeader header)
         {
             ReadyStatusUpdateMessage posMsg = header as ReadyStatusUpdateMessage;
