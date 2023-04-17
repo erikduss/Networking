@@ -67,9 +67,9 @@ namespace ChatClientExample {
             { NetworkMessageType.CHAT_MESSAGE,  HandleClientMessage },
             { NetworkMessageType.CHAT_QUIT,     HandleClientExit },
             { NetworkMessageType.INPUT_UPDATE,  HandleClientInput },
+            { NetworkMessageType.PONG,          HandleClientPong },
             { NetworkMessageType.READY_STATUS_UPDATE, HandleClientReadyStatus },
-            { NetworkMessageType.SPECIALIZATION_UPDATE, HandleClientSpecialization },
-            { NetworkMessageType.PONG,          HandleClientPong }
+            { NetworkMessageType.SPECIALIZATION_UPDATE, HandleClientSpecialization }
         };
 
         public NetworkDriver m_Driver;
@@ -78,6 +78,7 @@ namespace ChatClientExample {
 
         private Dictionary<NetworkConnection, string> nameList = new Dictionary<NetworkConnection, string>();
         private Dictionary<NetworkConnection, NetworkedLobbyPlayer> lobbyPlayerInstances = new Dictionary<NetworkConnection, NetworkedLobbyPlayer>();
+        private Dictionary<NetworkConnection, NetworkedPlayer> playerInstances = new Dictionary<NetworkConnection, NetworkedPlayer>();
         private Dictionary<NetworkConnection, PingPong> pongDict = new Dictionary<NetworkConnection, PingPong>();
 
         public ChatCanvas chat;
@@ -85,14 +86,11 @@ namespace ChatClientExample {
 
         void Start() {
             // Create Driver
-            NetworkSettings settings = new NetworkSettings();
-            settings.WithReliableStageParameters(windowSize: 32);
-            m_Driver = NetworkDriver.Create(settings);
+            m_Driver = NetworkDriver.Create(new ReliableUtility.Parameters { WindowSize = 32 });
             m_Pipeline = m_Driver.CreatePipeline(typeof(ReliableSequencedPipelineStage));
 
             // Open listener on server port
             NetworkEndPoint endpoint = NetworkEndPoint.AnyIpv4;
-
             endpoint.Port = 1511;
             if (m_Driver.Bind(endpoint) != 0)
                 Debug.Log("Failed to bind to port 1511");
@@ -126,7 +124,7 @@ namespace ChatClientExample {
             NetworkConnection c;
             while ((c = m_Driver.Accept()) != default(NetworkConnection)) {
                 m_Connections.Add(c);
-                Debug.Log("Accepted a connection");
+                // Debug.Log("Accepted a connection");
             }
 
             DataStreamReader stream;
@@ -178,6 +176,7 @@ namespace ChatClientExample {
 
                             uint destroyId = lobbyPlayerInstances[m_Connections[i]].networkId;
                             networkManager.DestroyWithId(destroyId);
+                            playerInstances.Remove(m_Connections[i]);
                             lobbyPlayerInstances.Remove(m_Connections[i]);
 
                             string name = pongDict[m_Connections[i]].name;
@@ -188,7 +187,7 @@ namespace ChatClientExample {
 
                             // Build messages
                             string msg = $"{name} has been Disconnected (connection timed out)";
-                            //chat.NewMessage(msg, ChatCanvas.leaveColor);
+                            chat.NewMessage(msg, ChatCanvas.leaveColor);
                         
                             ChatMessage quitMsg = new ChatMessage {
                                 message = msg,
@@ -277,7 +276,7 @@ namespace ChatClientExample {
             // Add to list
             serv.nameList.Add(connection, message.name);
             string msg = $"{message.name.ToString()} has joined the chat.";
-            //serv.chat.NewMessage(msg, ChatCanvas.joinColor);
+            serv.chat.NewMessage(msg, ChatCanvas.joinColor);
 
             ChatMessage chatMsg = new ChatMessage {
                 messageType = MessageType.JOIN,
@@ -293,21 +292,12 @@ namespace ChatClientExample {
             if (serv.networkManager.SpawnWithId(NetworkSpawnObject.PLAYERLOBBY, NetworkManager.NextNetworkID, out player)) {
                 // Get and setup player instance
                 NetworkedLobbyPlayer playerInstance = player.GetComponent<NetworkedLobbyPlayer>();
-
-                //otherwise the host client will have multiple players with the isLocal and isServer true
-                if(playerInstance.networkId == 1)
-                {
-                    playerInstance.isServer = true;
-                    playerInstance.isLocal = true;
-                }
-                else
-                {
-                    playerInstance.isServer = false;
-                    playerInstance.isLocal = false;
-                }
+                playerInstance.isServer = true;
+                playerInstance.isLocal = false;
 
                 playerInstance.transform.parent = GameObject.FindGameObjectWithTag("LobbyPlayerPanel").transform;
                 playerInstance.playerName = message.name.ToString();
+
                 networkId = playerInstance.networkId;
 
                 serv.lobbyPlayerInstances.Add(connection, playerInstance);
@@ -330,8 +320,8 @@ namespace ChatClientExample {
 
                 SpawnMessage spawnMsg = new SpawnMessage {
                     networkId = pair.Value.networkId,
-                    objectType = NetworkSpawnObject.PLAYERLOBBY,
-                    playerName = pair.Value.playerName
+                    playerName = pair.Value.playerName,
+                    objectType = NetworkSpawnObject.PLAYERLOBBY
                 };
 
                 serv.SendUnicast(connection, spawnMsg);
@@ -355,7 +345,7 @@ namespace ChatClientExample {
 
             if (serv.nameList.ContainsKey(connection)) {
                 string msg = $"{serv.nameList[connection]}: {receivedMsg.message}";
-                //serv.chat.NewMessage(msg, ChatCanvas.chatColor);
+                serv.chat.NewMessage(msg, ChatCanvas.chatColor);
 
                 receivedMsg.message = msg;
 
@@ -372,7 +362,7 @@ namespace ChatClientExample {
 
             if (serv.nameList.ContainsKey(connection)) {
                 string msg = $"{serv.nameList[connection]} has left the chat.";
-                //serv.chat.NewMessage(msg, ChatCanvas.leaveColor);
+                serv.chat.NewMessage(msg, ChatCanvas.leaveColor);
 
                 // Clean up
                 serv.nameList.Remove(connection);
@@ -411,7 +401,6 @@ namespace ChatClientExample {
 
             if (serv.lobbyPlayerInstances.ContainsKey(connection)) {
                 if (serv.lobbyPlayerInstances[connection].networkId == inputMsg.networkId) {
-                    //does not yet contain input
                     //serv.lobbyPlayerInstances[connection].UpdateInput(inputMsg.input);
                 }
                 else {
