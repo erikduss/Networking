@@ -85,7 +85,9 @@ namespace ChatClientExample {
 
         void Start() {
             // Create Driver
-            m_Driver = NetworkDriver.Create(new ReliableUtility.Parameters { WindowSize = 32 });
+            NetworkSettings settings = new NetworkSettings();
+            settings.WithReliableStageParameters(windowSize: 32);
+            m_Driver = NetworkDriver.Create(settings);
             m_Pipeline = m_Driver.CreatePipeline(typeof(ReliableSequencedPipelineStage));
 
             // Open listener on server port
