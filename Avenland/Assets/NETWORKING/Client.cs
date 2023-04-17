@@ -6,7 +6,6 @@ using Unity.Collections;
 using UnityEngine.UI;
 using Unity.Networking.Transport.Utilities;
 using UnityEngine.SceneManagement;
-using TMPro;
 
 namespace ChatClientExample
 {
@@ -18,18 +17,14 @@ namespace ChatClientExample
             { NetworkMessageType.NETWORK_DESTROY,           HandleNetworkDestroy },           // uint networkId
             { NetworkMessageType.NETWORK_UPDATE_POSITION,   HandleNetworkUpdate },            // uint networkId, vector3 position, vector3 rotation
             { NetworkMessageType.CHAT_MESSAGE,              HandleChatMessage },
-            { NetworkMessageType.PING,                      HandlePing },
-            { NetworkMessageType.READY_STATUS_UPDATE,       HandleReadyStatusUpdate },
-            { NetworkMessageType.SPECIALIZATION_UPDATE,     HandleSpecializationUpdate },
-            { NetworkMessageType.RPC,                       HandleRPC }
+            { NetworkMessageType.PING,                      HandlePing }
         };
 
         public NetworkDriver m_Driver;
         public NetworkPipeline m_Pipeline;
         public NetworkConnection m_Connection;
         public bool Done;
-
-        private NetworkManager networkManager;
+        public NetworkManager networkManager;
 
         public ChatCanvas chatCanvas;
 
@@ -39,15 +34,11 @@ namespace ChatClientExample
         bool connected = false;
         float startTime = 0;
 
-        public static bool isServer = false;
-
         // Start is called before the first frame update
         void Start() {
             startTime = Time.time;
             // Create connection to server IP
-            NetworkSettings settings = new NetworkSettings();
-            settings.WithReliableStageParameters(windowSize: 32);
-            m_Driver = NetworkDriver.Create(settings);
+            m_Driver = NetworkDriver.Create(new ReliableUtility.Parameters { WindowSize = 32 });
             m_Pipeline = m_Driver.CreatePipeline(typeof(ReliableSequencedPipelineStage));
 
             m_Connection = default(NetworkConnection);
@@ -55,8 +46,6 @@ namespace ChatClientExample
             var endpoint = NetworkEndPoint.Parse(serverIP, 9000, NetworkFamily.Ipv4);
             endpoint.Port = 1511;
             m_Connection = m_Driver.Connect(endpoint);
-
-            networkManager = GameObject.FindGameObjectWithTag("GameOptions").GetComponent<NetworkManager>();
         }
 
         // No collections list this time...
@@ -122,12 +111,7 @@ namespace ChatClientExample
             }
         }
 
-        public string GetName()
-        {
-            return clientName;
-        }
-
-        public TMP_InputField input;
+        public InputField input;
 
         // UI FUNCTIONS (0 refs)
         public void SendMessage() {
@@ -155,7 +139,7 @@ namespace ChatClientExample
                 m_Driver.EndSend(writer);
             }
             else {
-                Debug.LogError($"Could not write message to driver: {result}", this);
+                Debug.LogError($"Could not wrote message to driver: {result}", this);
             }
         }
 
@@ -166,84 +150,17 @@ namespace ChatClientExample
         //      - network destroy           (WIP)
         //      - network update            (WIP)
 
-        static void HandleRPC(Client client, MessageHeader header)
-        {
-            RPCMessage msg = header as RPCMessage;
-
-            // try to call the function
-            try
-            {
-                msg.mInfo.Invoke(msg.target, msg.data);
-            }
-            catch (System.Exception e)
-            {
-                Debug.Log(e.Message);
-                Debug.Log(e.StackTrace);
-            }
-        }
-        static void HandleReadyStatusUpdate(Client client, MessageHeader header)
-        {
-            ReadyStatusUpdateMessage posMsg = header as ReadyStatusUpdateMessage;
-
-            GameObject obj;
-            if (client.networkManager.GetReference(posMsg.networkId, out obj))
-            {
-                NetworkedLobbyPlayer playerStat = obj.GetComponent<NetworkedLobbyPlayer>();
-                playerStat.UpdateReadyStatus(posMsg.status);
-                if (isServer)
-                {
-                    GameObject.FindObjectOfType<LobbyManager>().CheckReadyValidState();
-                }
-            }
-            else
-            {
-                Debug.LogError($"Could not find object with id {posMsg.networkId}!");
-            }
-        }
-
-        static void HandleSpecializationUpdate(Client client, MessageHeader header)
-        {
-            SpecializationUpdateMessage specMsg = header as SpecializationUpdateMessage;
-
-            GameObject obj;
-            if (client.networkManager.GetReference(specMsg.networkId, out obj))
-            {
-                NetworkedLobbyPlayer playerStat = obj.GetComponent<NetworkedLobbyPlayer>();
-                playerStat.UpdateSpecialization(specMsg.specialization);
-            }
-            else
-            {
-                Debug.LogError($"Could not find object with id {specMsg.networkId}!");
-            }
-        }
-
         static void HandleServerHandshakeResponse(Client client, MessageHeader header) {
             HandshakeResponseMessage response = header as HandshakeResponseMessage;
 
             GameObject obj;
-
-            if (!isServer)
-            {
-                if (client.networkManager.SpawnWithId(NetworkSpawnObject.PLAYERLOBBY, response.networkId, out obj))
-                {
-                    NetworkedLobbyPlayer player = obj.GetComponent<NetworkedLobbyPlayer>();
-                    player.isLocal = true;
-                    player.isServer = false;
-                    player.playerName = client.GetName();
-                    GameObject parentObj = GameObject.FindGameObjectWithTag("LobbyPlayerPanel");
-                    player.transform.SetParent(parentObj.transform);
-                }
-                else
-                {
-                    Debug.LogError("Could not spawn player!");
-                }
+            if (client.networkManager.SpawnWithId(NetworkSpawnObject.PLAYER, response.networkId, out obj)) {
+                NetworkedPlayer player = obj.GetComponent<NetworkedPlayer>();
+                player.isLocal = true;
+                player.isServer = false;
             }
-            else
-            {
-                if (isServer)
-                {
-                    GameObject.FindObjectOfType<LobbyManager>().CheckReadyValidState();
-                }
+            else {
+                Debug.LogError("Could not spawn player!");
             }
         }
 
@@ -251,32 +168,8 @@ namespace ChatClientExample
             SpawnMessage spawnMsg = header as SpawnMessage;
 
             GameObject obj;
-
-            if (!isServer)
-            {
-                if (client.networkManager.SpawnWithId(spawnMsg.objectType, spawnMsg.networkId, out obj))
-                {
-                    //This is required to set the parent and the name of the non local player correctly in the client scene
-                    NetworkedLobbyPlayer nonLocalPlayer = obj.GetComponent<NetworkedLobbyPlayer>();
-                    if (nonLocalPlayer != null)
-                    {
-                        //Debug.Log(spawnMsg.playerName.ToString());
-                        nonLocalPlayer.playerName = spawnMsg.playerName.ToString();
-                        GameObject parentObj = GameObject.FindGameObjectWithTag("LobbyPlayerPanel");
-                        nonLocalPlayer.transform.SetParent(parentObj.transform);
-                    }
-                }
-                else
-                {
-                    Debug.LogError($"Could not spawn {spawnMsg.objectType} for id {spawnMsg.networkId}!");
-                }
-            }
-            else
-            {
-                if (isServer)
-                {
-                    GameObject.FindObjectOfType<LobbyManager>().CheckReadyValidState();
-                }
+            if (!client.networkManager.SpawnWithId(spawnMsg.objectType, spawnMsg.networkId, out obj)) {
+                Debug.LogError($"Could not spawn {spawnMsg.objectType} for id {spawnMsg.networkId}!");
             }
         }
 
@@ -284,11 +177,6 @@ namespace ChatClientExample
             DestroyMessage destroyMsg = header as DestroyMessage;
             if (!client.networkManager.DestroyWithId(destroyMsg.networkId)) {
                 Debug.LogError($"Could not destroy object with id {destroyMsg.networkId}!");
-            }
-
-            if (isServer)
-            {
-                GameObject.FindObjectOfType<LobbyManager>().CheckReadyValidState();
             }
         }
 

@@ -27,7 +27,7 @@ namespace ChatClientExample
     {
 		static NetworkManager networkManager;
 
-		public override NetworkMessageType Type => NetworkMessageType.RPC;
+		public override NetworkMessageType Type => NetworkMessageType.PING;
 
 		public uint networkId;
 		public NetworkedBehaviour target;

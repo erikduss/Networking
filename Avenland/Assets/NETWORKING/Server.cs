@@ -21,10 +21,7 @@ namespace ChatClientExample {
         NETWORK_UPDATE_POSITION,
         INPUT_UPDATE,                        // uint networkId, InputUpdate (float, float, bool)
         PING,
-        PONG,
-        RPC,
-        READY_STATUS_UPDATE,
-        SPECIALIZATION_UPDATE
+        PONG
     }
 
     public enum MessageType
@@ -53,10 +50,7 @@ namespace ChatClientExample {
             { NetworkMessageType.NETWORK_UPDATE_POSITION,   typeof(UpdatePositionMessage) },
             { NetworkMessageType.INPUT_UPDATE,              typeof(InputUpdateMessage) },
             { NetworkMessageType.PING,                      typeof(PingMessage) },
-            { NetworkMessageType.PONG,                      typeof(PongMessage) },
-            { NetworkMessageType.READY_STATUS_UPDATE,       typeof(ReadyStatusUpdateMessage) },
-            { NetworkMessageType.SPECIALIZATION_UPDATE,     typeof(SpecializationUpdateMessage) },
-            { NetworkMessageType.RPC,                       typeof(RPCMessage) }
+            { NetworkMessageType.PONG,                      typeof(PongMessage) }
         };
     }
 
@@ -67,8 +61,6 @@ namespace ChatClientExample {
             { NetworkMessageType.CHAT_MESSAGE,  HandleClientMessage },
             { NetworkMessageType.CHAT_QUIT,     HandleClientExit },
             { NetworkMessageType.INPUT_UPDATE,  HandleClientInput },
-            { NetworkMessageType.READY_STATUS_UPDATE, HandleClientReadyStatus },
-            { NetworkMessageType.SPECIALIZATION_UPDATE, HandleClientSpecialization },
             { NetworkMessageType.PONG,          HandleClientPong }
         };
 
@@ -77,7 +69,7 @@ namespace ChatClientExample {
         private NativeList<NetworkConnection> m_Connections;
 
         private Dictionary<NetworkConnection, string> nameList = new Dictionary<NetworkConnection, string>();
-        private Dictionary<NetworkConnection, NetworkedLobbyPlayer> lobbyPlayerInstances = new Dictionary<NetworkConnection, NetworkedLobbyPlayer>();
+        private Dictionary<NetworkConnection, NetworkedPlayer> playerInstances = new Dictionary<NetworkConnection, NetworkedPlayer>();
         private Dictionary<NetworkConnection, PingPong> pongDict = new Dictionary<NetworkConnection, PingPong>();
 
         public ChatCanvas chat;
@@ -85,14 +77,11 @@ namespace ChatClientExample {
 
         void Start() {
             // Create Driver
-            NetworkSettings settings = new NetworkSettings();
-            settings.WithReliableStageParameters(windowSize: 32);
-            m_Driver = NetworkDriver.Create(settings);
+            m_Driver = NetworkDriver.Create(new ReliableUtility.Parameters { WindowSize = 32 });
             m_Pipeline = m_Driver.CreatePipeline(typeof(ReliableSequencedPipelineStage));
 
             // Open listener on server port
             NetworkEndPoint endpoint = NetworkEndPoint.AnyIpv4;
-
             endpoint.Port = 1511;
             if (m_Driver.Bind(endpoint) != 0)
                 Debug.Log("Failed to bind to port 1511");
@@ -126,7 +115,7 @@ namespace ChatClientExample {
             NetworkConnection c;
             while ((c = m_Driver.Accept()) != default(NetworkConnection)) {
                 m_Connections.Add(c);
-                Debug.Log("Accepted a connection");
+                // Debug.Log("Accepted a connection");
             }
 
             DataStreamReader stream;
@@ -176,9 +165,9 @@ namespace ChatClientExample {
                                 nameList.Remove(m_Connections[i]);
                             }
 
-                            uint destroyId = lobbyPlayerInstances[m_Connections[i]].networkId;
+                            uint destroyId = playerInstances[m_Connections[i]].networkId;
                             networkManager.DestroyWithId(destroyId);
-                            lobbyPlayerInstances.Remove(m_Connections[i]);
+                            playerInstances.Remove(m_Connections[i]);
 
                             string name = pongDict[m_Connections[i]].name;
                             pongDict.Remove(m_Connections[i]);
@@ -188,7 +177,7 @@ namespace ChatClientExample {
 
                             // Build messages
                             string msg = $"{name} has been Disconnected (connection timed out)";
-                            //chat.NewMessage(msg, ChatCanvas.leaveColor);
+                            chat.NewMessage(msg, ChatCanvas.leaveColor);
                         
                             ChatMessage quitMsg = new ChatMessage {
                                 message = msg,
@@ -254,30 +243,14 @@ namespace ChatClientExample {
         //  - Client chat message               (DONE)
         //  - Client chat exit                  (DONE)
         //  - Input update
-
-        static void HandleRPC(Server serv, MessageHeader header)
-        {
-            RPCMessage msg = header as RPCMessage;
-
-            // try to call the function
-            try
-            {
-                msg.mInfo.Invoke(msg.target, msg.data);
-            }
-            catch (System.Exception e)
-            {
-                Debug.Log(e.Message);
-                Debug.Log(e.StackTrace);
-            }
-        }
-
+        
         static void HandleClientHandshake(Server serv, NetworkConnection connection, MessageHeader header) {
             HandshakeMessage message = header as HandshakeMessage;
 
             // Add to list
             serv.nameList.Add(connection, message.name);
             string msg = $"{message.name.ToString()} has joined the chat.";
-            //serv.chat.NewMessage(msg, ChatCanvas.joinColor);
+            serv.chat.NewMessage(msg, ChatCanvas.joinColor);
 
             ChatMessage chatMsg = new ChatMessage {
                 messageType = MessageType.JOIN,
@@ -290,27 +263,14 @@ namespace ChatClientExample {
             // spawn a non-local, server player
             GameObject player;
             uint networkId = 0;
-            if (serv.networkManager.SpawnWithId(NetworkSpawnObject.PLAYERLOBBY, NetworkManager.NextNetworkID, out player)) {
+            if (serv.networkManager.SpawnWithId(NetworkSpawnObject.PLAYER, NetworkManager.NextNetworkID, out player)) {
                 // Get and setup player instance
-                NetworkedLobbyPlayer playerInstance = player.GetComponent<NetworkedLobbyPlayer>();
-
-                //otherwise the host client will have multiple players with the isLocal and isServer true
-                if(playerInstance.networkId == 1)
-                {
-                    playerInstance.isServer = true;
-                    playerInstance.isLocal = true;
-                }
-                else
-                {
-                    playerInstance.isServer = false;
-                    playerInstance.isLocal = false;
-                }
-
-                playerInstance.transform.parent = GameObject.FindGameObjectWithTag("LobbyPlayerPanel").transform;
-                playerInstance.playerName = message.name.ToString();
+                NetworkedPlayer playerInstance = player.GetComponent<NetworkedPlayer>();
+                playerInstance.isServer = true;
+                playerInstance.isLocal = false;
                 networkId = playerInstance.networkId;
 
-                serv.lobbyPlayerInstances.Add(connection, playerInstance);
+                serv.playerInstances.Add(connection, playerInstance);
 
                 // Send spawn local player back to sender
                 HandshakeResponseMessage responseMsg = new HandshakeResponseMessage {
@@ -325,13 +285,12 @@ namespace ChatClientExample {
             }
 
             // Send all existing players to this player
-            foreach (KeyValuePair<NetworkConnection, NetworkedLobbyPlayer> pair in serv.lobbyPlayerInstances) {
+            foreach (KeyValuePair<NetworkConnection, NetworkedPlayer> pair in serv.playerInstances) {
                 if (pair.Key == connection) continue;
 
                 SpawnMessage spawnMsg = new SpawnMessage {
                     networkId = pair.Value.networkId,
-                    objectType = NetworkSpawnObject.PLAYERLOBBY,
-                    playerName = pair.Value.playerName
+                    objectType = NetworkSpawnObject.PLAYER
                 };
 
                 serv.SendUnicast(connection, spawnMsg);
@@ -341,7 +300,7 @@ namespace ChatClientExample {
             if (networkId != 0) {
                 SpawnMessage spawnMsg = new SpawnMessage {
                     networkId = networkId,
-                    objectType = NetworkSpawnObject.PLAYERLOBBY
+                    objectType = NetworkSpawnObject.PLAYER
                 };
                 serv.SendBroadcast(spawnMsg, connection);
             }
@@ -355,7 +314,7 @@ namespace ChatClientExample {
 
             if (serv.nameList.ContainsKey(connection)) {
                 string msg = $"{serv.nameList[connection]}: {receivedMsg.message}";
-                //serv.chat.NewMessage(msg, ChatCanvas.chatColor);
+                serv.chat.NewMessage(msg, ChatCanvas.chatColor);
 
                 receivedMsg.message = msg;
 
@@ -372,7 +331,7 @@ namespace ChatClientExample {
 
             if (serv.nameList.ContainsKey(connection)) {
                 string msg = $"{serv.nameList[connection]} has left the chat.";
-                //serv.chat.NewMessage(msg, ChatCanvas.leaveColor);
+                serv.chat.NewMessage(msg, ChatCanvas.leaveColor);
 
                 // Clean up
                 serv.nameList.Remove(connection);
@@ -383,9 +342,9 @@ namespace ChatClientExample {
 
                 connection.Disconnect(serv.m_Driver);
 
-                uint destroyId = serv.lobbyPlayerInstances[connection].networkId;
-                Destroy(serv.lobbyPlayerInstances[connection].gameObject);
-                serv.lobbyPlayerInstances.Remove(connection);
+                uint destroyId = serv.playerInstances[connection].networkId;
+                Destroy(serv.playerInstances[connection].gameObject);
+                serv.playerInstances.Remove(connection);
 
                 // Build messages
                 ChatMessage chatMsg = new ChatMessage {
@@ -409,10 +368,9 @@ namespace ChatClientExample {
         static void HandleClientInput(Server serv, NetworkConnection connection, MessageHeader header) {
             InputUpdateMessage inputMsg = header as InputUpdateMessage;
 
-            if (serv.lobbyPlayerInstances.ContainsKey(connection)) {
-                if (serv.lobbyPlayerInstances[connection].networkId == inputMsg.networkId) {
-                    //does not yet contain input
-                    //serv.lobbyPlayerInstances[connection].UpdateInput(inputMsg.input);
+            if (serv.playerInstances.ContainsKey(connection)) {
+                if (serv.playerInstances[connection].networkId == inputMsg.networkId) {
+                    serv.playerInstances[connection].UpdateInput(inputMsg.input);
                 }
                 else {
                     Debug.LogError("NetworkID Mismatch for Player Input");
@@ -420,50 +378,6 @@ namespace ChatClientExample {
             }
             else {
                 Debug.LogError("Received player input from unlisted connection");
-            }
-        }
-
-        static void HandleClientReadyStatus(Server serv, NetworkConnection connection, MessageHeader header)
-        {
-            ReadyStatusUpdateMessage inputMsg = header as ReadyStatusUpdateMessage;
-
-            if (serv.lobbyPlayerInstances.ContainsKey(connection))
-            {
-                if (serv.lobbyPlayerInstances[connection].networkId == inputMsg.networkId)
-                {
-                    serv.lobbyPlayerInstances[connection].UpdateReadyStatus(inputMsg.status);
-                    serv.SendBroadcast(inputMsg);
-                }
-                else
-                {
-                    Debug.LogError("NetworkID Mismatch for Player Input");
-                }
-            }
-            else
-            {
-                Debug.LogError("Received player ready status from unlisted connection");
-            }
-        }
-
-        static void HandleClientSpecialization(Server serv, NetworkConnection connection, MessageHeader header)
-        {
-            SpecializationUpdateMessage specMsg = header as SpecializationUpdateMessage;
-
-            if (serv.lobbyPlayerInstances.ContainsKey(connection))
-            {
-                if (serv.lobbyPlayerInstances[connection].networkId == specMsg.networkId)
-                {
-                    serv.lobbyPlayerInstances[connection].UpdateSpecialization(specMsg.specialization);
-                    serv.SendBroadcast(specMsg);
-                }
-                else
-                {
-                    Debug.LogError("NetworkID Mismatch for Player Input");
-                }
-            }
-            else
-            {
-                Debug.LogError("Received player ready status from unlisted connection");
             }
         }
 

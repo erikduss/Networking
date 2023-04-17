@@ -9,7 +9,8 @@ namespace ChatClientExample
     {
 		public override NetworkMessageType Type { 
 			get {
-				return NetworkMessageType.READY_STATUS_UPDATE;
+				//return NetworkMessageType.READY_STATUS_UPDATE;
+				return NetworkMessageType.PING;
 			}
 		}
 
