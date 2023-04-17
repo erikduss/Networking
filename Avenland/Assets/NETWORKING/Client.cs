@@ -44,8 +44,8 @@ namespace ChatClientExample
         // Start is called before the first frame update
         void Start() {
             startTime = Time.time;
-            // Create connection to server
-            IPNetworkSettings settings = new NetworkSettings();
+            // Create connection to server IP
+            NetworkSettings settings = new NetworkSettings();
             settings.WithReliableStageParameters(windowSize: 32);
             m_Driver = NetworkDriver.Create(settings);
             m_Pipeline = m_Driver.CreatePipeline(typeof(ReliableSequencedPipelineStage));
