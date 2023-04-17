@@ -4372,6 +4372,7 @@ GameObject:
   - component: {fileID: 1163648929}
   - component: {fileID: 1163648931}
   - component: {fileID: 1163648932}
+  - component: {fileID: 1163648933}
   m_Layer: 0
   m_Name: NetworkConnection
   m_TagString: Untagged
@@ -4407,6 +4408,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Done: 0
+  networkManager: {fileID: 1163648933}
   chatCanvas: {fileID: 1377917194}
   input: {fileID: 1115340342}
 --- !u!114 &1163648932
@@ -4428,6 +4430,19 @@ MonoBehaviour:
   readyButtonText: {fileID: 600217359}
   startGameButton: {fileID: 149592821}
   specializationButtonText: {fileID: 1193924610}
+--- !u!114 &1163648933
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1163648928}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd94ede3035fbce429c10a60c7e159e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawnInfo: {fileID: 11400000, guid: c428c92c76d81ca45b79877cce90d2a3, type: 2}
 --- !u!1 &1193924608
 GameObject:
   m_ObjectHideFlags: 0

@@ -6,6 +6,7 @@ using Unity.Collections;
 using UnityEngine.UI;
 using Unity.Networking.Transport.Utilities;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 namespace ChatClientExample
 {
@@ -111,7 +112,7 @@ namespace ChatClientExample
             }
         }
 
-        public InputField input;
+        public TMP_InputField input;
 
         // UI FUNCTIONS (0 refs)
         public void SendMessage() {
