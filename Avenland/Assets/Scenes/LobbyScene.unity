@@ -4407,6 +4407,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Done: 0
+  networkManager: {fileID: 0}
   chatCanvas: {fileID: 1377917194}
   input: {fileID: 1115340342}
 --- !u!114 &1163648932
