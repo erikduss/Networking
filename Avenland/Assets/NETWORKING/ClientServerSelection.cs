@@ -20,6 +20,11 @@ namespace ChatClientExample
 		}
 
 		public void GoServer() {
+            SceneManager.LoadScene(serverScene);
+        }
+
+        public void GoClientAsHost()
+        {
             settings.isHost = true;
             settings.SetUpServer();
 
@@ -39,7 +44,7 @@ namespace ChatClientExample
             Client.isServer = true;
             settings.playerNames.Add(name);
 
-            SceneManager.LoadScene(serverScene);
+            SceneManager.LoadScene(clientScene);
         }
 
         public void GoClient() {
