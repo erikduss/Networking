@@ -45,7 +45,7 @@ namespace ChatClientExample
             m_Connection = default(NetworkConnection);
 
             var endpoint = NetworkEndPoint.Parse(serverIP, 9000, NetworkFamily.Ipv4);
-            endpoint.Port = 1511;
+            endpoint.Port = 9000; //1511
             m_Connection = m_Driver.Connect(endpoint);
         }
 
