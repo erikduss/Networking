@@ -88,6 +88,11 @@ namespace ChatClientExample {
             else
                 m_Driver.Listen();
 
+            Debug.Log("Started server!");
+
+            Debug.Log("Server address = " + endpoint.Address);
+            Debug.Log("Server port = " + endpoint.Port);
+
             m_Connections = new NativeList<NetworkConnection>(64, Allocator.Persistent);
         }
 
@@ -115,7 +120,7 @@ namespace ChatClientExample {
             NetworkConnection c;
             while ((c = m_Driver.Accept()) != default(NetworkConnection)) {
                 m_Connections.Add(c);
-                // Debug.Log("Accepted a connection");
+                Debug.Log("Accepted a connection");
             }
 
             DataStreamReader stream;
@@ -382,7 +387,7 @@ namespace ChatClientExample {
         }
 
         static void HandleClientPong(Server serv, NetworkConnection connection, MessageHeader header) {
-            // Debug.Log("PONG");
+            Debug.Log("PONG");
             serv.pongDict[connection].status = 3;   //reset retry count
         }
     }

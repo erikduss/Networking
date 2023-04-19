@@ -18,6 +18,8 @@ namespace ChatClientExample
 		}
 
 		public void GoServer() {
+            Debug.Log("Starting server....");
+
             SceneManager.LoadScene(serverScene);
         }
 
@@ -38,6 +40,11 @@ namespace ChatClientExample
                 }
             }
             Client.clientName = name;
+
+            Debug.Log("Staring client....");
+            Debug.Log("Name = " + Client.clientName);
+            Debug.Log("Server IP = " + Client.serverIP);
+            Debug.Log("Server port = " + endPoint.Port);
 
             SceneManager.LoadScene(clientScene);
         }

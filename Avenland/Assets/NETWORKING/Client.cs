@@ -47,6 +47,11 @@ namespace ChatClientExample
             var endpoint = NetworkEndPoint.Parse(serverIP, 9000, NetworkFamily.Ipv4);
             endpoint.Port = 9000; //1511
             m_Connection = m_Driver.Connect(endpoint);
+
+            Debug.Log("Starting connection to server");
+
+            Debug.Log("Server address = " + endpoint.Address);
+            Debug.Log("Server port = " + endpoint.Port);
         }
 
         // No collections list this time...
