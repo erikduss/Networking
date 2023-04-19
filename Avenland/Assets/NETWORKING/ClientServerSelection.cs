@@ -11,7 +11,7 @@ namespace ChatClientExample
     public class ClientServerSelection : MonoBehaviour
     {
         public string serverScene, clientScene;
-        public TextMeshProUGUI serverIPInput, nameInput, nameHostInput;
+        public TMP_InputField serverIPInput, nameInput, nameHostInput, serverPort;
         private GameSettings settings;
 
 		private void Start() {
@@ -20,6 +20,13 @@ namespace ChatClientExample
 		}
 
 		public void GoServer() {
+            if(serverPort.text.Length > 0)
+            {
+                string text = serverPort.text;
+                int val = int.Parse(text);
+                Server.ServerPort = (ushort)val;
+            }
+
             SceneManager.LoadScene(serverScene);
         }
 

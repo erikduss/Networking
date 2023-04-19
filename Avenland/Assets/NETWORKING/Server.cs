@@ -83,6 +83,8 @@ namespace ChatClientExample {
         public ChatCanvas chat;
         public NetworkManager networkManager;
 
+        public static ushort ServerPort = 9000;
+
         void Start() {
             // Create Driver
             NetworkSettings settings = new NetworkSettings();
@@ -93,11 +95,13 @@ namespace ChatClientExample {
             // Open listener on server port
             NetworkEndPoint endpoint = NetworkEndPoint.AnyIpv4;
 
-            endpoint.Port = 9000; //1511
+            endpoint.Port = ServerPort; //1511 //9000 //12567
             if (m_Driver.Bind(endpoint) != 0)
                 Debug.Log("Failed to bind to port 1511");
             else
                 m_Driver.Listen();
+
+            Debug.Log("Started server on port: " + endpoint.Port);
 
             m_Connections = new NativeList<NetworkConnection>(64, Allocator.Persistent);
         }
