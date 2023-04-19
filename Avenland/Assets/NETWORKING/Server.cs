@@ -93,7 +93,7 @@ namespace ChatClientExample {
             // Open listener on server port
             NetworkEndPoint endpoint = NetworkEndPoint.AnyIpv4;
 
-            endpoint.Port = 1511;
+            endpoint.Port = 9000; //1511
             if (m_Driver.Bind(endpoint) != 0)
                 Debug.Log("Failed to bind to port 1511");
             else
