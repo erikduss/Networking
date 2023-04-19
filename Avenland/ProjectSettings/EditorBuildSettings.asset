@@ -9,9 +9,6 @@ EditorBuildSettings:
     path: Assets/Scenes/MainMenu.unity
     guid: c92a4bfc7ada1d64fb66cdaa08801245
   - enabled: 1
-    path: Assets/NETWORKING/Scenes/startup.unity
-    guid: 295b4c21d6f97d14f98d86e336ff7043
-  - enabled: 1
     path: Assets/Scenes/LobbyScene.unity
     guid: 98f5633c2a96d6e46a52f2340c65dd53
   - enabled: 1
@@ -20,10 +17,4 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/ServerScene.unity
     guid: c15cc673630e0944db14c842450a4e15
-  - enabled: 1
-    path: Assets/NETWORKING/Scenes/server.unity
-    guid: cf89e74147c67154f920c69c7a4a1200
-  - enabled: 1
-    path: Assets/NETWORKING/Scenes/client.unity
-    guid: ca79d0842e199a44fbbbfde22a285b85
   m_configObjects: {}
