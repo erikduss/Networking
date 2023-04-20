@@ -21,7 +21,8 @@ namespace ChatClientExample
             { NetworkMessageType.PING,                      HandlePing },
             { NetworkMessageType.READY_STATUS_UPDATE,       HandleReadyStatusUpdate },
             { NetworkMessageType.SPECIALIZATION_UPDATE,     HandleSpecializationUpdate },
-            { NetworkMessageType.RPC,                       HandleRPC }
+            { NetworkMessageType.RPC,                       HandleRPC },
+            { NetworkMessageType.ASSIGN_SERVER_OPERATOR,    HandleServerOperatorAssignment }
         };
 
         public NetworkDriver m_Driver;
@@ -281,6 +282,35 @@ namespace ChatClientExample
                 obj.transform.eulerAngles = posMsg.rotation;
             }
             else {
+                Debug.LogError($"Could not find object with id {posMsg.networkId}!");
+            }
+        }
+
+        static void HandleServerOperatorAssignment(Client client, MessageHeader header)
+        {
+            AssignServerOpertorMessage posMsg = header as AssignServerOpertorMessage;
+
+            GameObject obj;
+            if (client.networkManager.GetReference(posMsg.networkId, out obj))
+            {
+                NetworkedLobbyPlayer playerStat = obj.GetComponent<NetworkedLobbyPlayer>();
+
+                if(posMsg.isServerOperator == 1)
+                {
+                    playerStat.SetOperatorStatus(true);
+                }
+                else
+                {
+                    playerStat.SetOperatorStatus(false);
+                }
+
+                //if (isServer)
+                //{
+                //    GameObject.FindObjectOfType<LobbyManager>().CheckReadyValidState();
+                //}
+            }
+            else
+            {
                 Debug.LogError($"Could not find object with id {posMsg.networkId}!");
             }
         }

@@ -4,6 +4,8 @@ using UnityEngine;
 using Unity.Networking.Transport;
 using Unity.Collections;
 using Unity.Networking.Transport.Utilities;
+using System.Linq;
+using UnityEngine.Networking.Types;
 
 namespace ChatClientExample {
 
@@ -24,7 +26,8 @@ namespace ChatClientExample {
         PONG,
         RPC,
         READY_STATUS_UPDATE,
-        SPECIALIZATION_UPDATE
+        SPECIALIZATION_UPDATE,
+        ASSIGN_SERVER_OPERATOR
     }
 
     public enum MessageType
@@ -56,7 +59,8 @@ namespace ChatClientExample {
             { NetworkMessageType.PONG,                      typeof(PongMessage) },
             { NetworkMessageType.READY_STATUS_UPDATE,       typeof(ReadyStatusUpdateMessage) },
             { NetworkMessageType.SPECIALIZATION_UPDATE,     typeof(SpecializationUpdateMessage) },
-            { NetworkMessageType.RPC,                       typeof(RPCMessage) }
+            { NetworkMessageType.RPC,                       typeof(RPCMessage) },
+            { NetworkMessageType.ASSIGN_SERVER_OPERATOR,    typeof(AssignServerOpertorMessage) }
         };
     }
 
@@ -84,6 +88,8 @@ namespace ChatClientExample {
         public NetworkManager networkManager;
 
         public static ushort ServerPort = 9000;
+
+        public static int operatorID = -1;
 
         void Start() {
             // Create Driver
@@ -216,6 +222,8 @@ namespace ChatClientExample {
                     SendUnicast(m_Connections[i], pingMsg);
                 }
             }
+
+            CheckIfNewOperatorNeedsToBeAssigned();
         }
 
         private void CleanupDeadConnections()
@@ -312,7 +320,7 @@ namespace ChatClientExample {
                 NetworkedLobbyPlayer playerInstance = player.GetComponent<NetworkedLobbyPlayer>();
 
                 //otherwise the host client will have multiple players with the isLocal and isServer true
-                if(playerInstance.networkId == 1)
+                if (playerInstance.networkId == 1)
                 {
                     playerInstance.isServerOperator = true; //the first player in the lobby will be the server operator
                     playerInstance.isLocal = true;
@@ -361,9 +369,78 @@ namespace ChatClientExample {
                     objectType = NetworkSpawnObject.PLAYERLOBBY
                 };
                 serv.SendBroadcast(spawnMsg, connection);
+
+                AssignServerOpertorMessage operatorMessage;
+
+                if(networkId == 1)
+                {
+                    operatorMessage = new AssignServerOpertorMessage
+                    {
+                        networkId = networkId,
+                        isServerOperator = 1
+                    };
+
+                    operatorID = 1;
+                }
+                else
+                {
+                    operatorMessage = new AssignServerOpertorMessage
+                    {
+                        networkId = networkId,
+                        isServerOperator = 0
+                    };
+                }
+
+                serv.SendBroadcast(operatorMessage);
             }
             else {
                 Debug.LogError("Invalid network id for broadcasting creation");
+            }
+        }
+
+        private void CheckIfNewOperatorNeedsToBeAssigned()
+        {
+            if(lobbyPlayerInstances.Values.Count > 0)
+            {
+                int lowestID = 1000;
+                bool operatorAvailable = false;
+
+                foreach (NetworkedLobbyPlayer player in lobbyPlayerInstances.Values)
+                {
+                    if (player.isServerOperator)
+                    {
+                        operatorAvailable = true;
+                    }
+
+                    if (player.networkId < lowestID)
+                    {
+                        lowestID = ((int)player.networkId);
+                    }
+                }
+
+                if (!operatorAvailable)
+                {
+                    NetworkedLobbyPlayer newOperator;
+                    newOperator = lobbyPlayerInstances.Values.Where(x => x.networkId == lowestID).First();
+
+                    if (newOperator != null)
+                    {
+                        AssignServerOpertorMessage operatorMessage = new AssignServerOpertorMessage
+                        {
+                            networkId = ((uint)lowestID),
+                            isServerOperator = 1
+                        };
+
+                        operatorID = lowestID;
+                        newOperator.SetOperatorStatus(true);
+
+                        this.SendBroadcast(operatorMessage);
+                    }
+                    else
+                    {
+                        Debug.Log("NEW OPERATOR NOT FOUND");
+                    }
+                }
             }
         }
 
@@ -399,6 +476,11 @@ namespace ChatClientExample {
                 }
 
                 connection.Disconnect(serv.m_Driver);
+
+                if (serv.lobbyPlayerInstances[connection].networkId == operatorID)
+                {
+                    operatorID = -1;
+                }
 
                 uint destroyId = serv.lobbyPlayerInstances[connection].networkId;
                 Destroy(serv.lobbyPlayerInstances[connection].gameObject);

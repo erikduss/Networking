@@ -42,15 +42,18 @@ namespace ChatClientExample
 				transform.parent.SetAsFirstSibling();
 			}
 
-			if (isServerOperator)
-			{
-				operatorIndicator.SetActive(true);
-			}
-		}
+            SetOperatorStatus(isServerOperator);
+        }
 
 		private void Update() {
 			
 		}
+
+		public void SetOperatorStatus(bool status)
+		{
+            operatorIndicator.SetActive(status);
+			isServerOperator = status;
+        }
 
 		public void SendStatusUpdate(uint stat)
         {
