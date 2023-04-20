@@ -11,7 +11,7 @@ namespace ChatClientExample
     public class ClientServerSelection : MonoBehaviour
     {
         public string serverScene, clientScene;
-        public TMP_InputField serverIPInput, nameInput, nameHostInput, serverPort;
+        public TMP_InputField serverIPInput, nameInput, serverPort;
         private GameSettings settings;
 
 		private void Start() {
@@ -30,29 +30,29 @@ namespace ChatClientExample
             SceneManager.LoadScene(serverScene);
         }
 
-        public void GoClientAsHost()
-        {
-            settings.isHost = true;
-            settings.SetUpServer();
+        //public void GoClientAsHost()
+        //{
+        //    settings.isHost = true;
+        //    settings.SetUpServer();
 
-            Client.serverIP = "127.0.0.1"; //Only this works
-            //Client.serverIP = "192.168.2.28";
+        //    Client.serverIP = "127.0.0.1"; //Only this works
+        //    //Client.serverIP = "192.168.2.28";
 
-            string name = nameHostInput.text;
-            if (string.IsNullOrEmpty(nameHostInput.text))
-            {
-                name = "";
-                for (int i = 0; i < 16; ++i)
-                {
-                    name += (char)Random.Range(97, 97 + 26);
-                }
-            }
-            Client.clientName = name;
-            Client.isServer = true;
-            settings.playerNames.Add(name);
+        //    string name = nameHostInput.text;
+        //    if (string.IsNullOrEmpty(nameHostInput.text))
+        //    {
+        //        name = "";
+        //        for (int i = 0; i < 16; ++i)
+        //        {
+        //            name += (char)Random.Range(97, 97 + 26);
+        //        }
+        //    }
+        //    Client.clientName = name;
+        //    Client.isServer = true;
+        //    settings.playerNames.Add(name);
 
-            SceneManager.LoadScene(clientScene);
-        }
+        //    SceneManager.LoadScene(clientScene);
+        //}
 
         public void GoClient() {
             NetworkEndPoint endPoint;
