@@ -117,21 +117,9 @@ namespace ChatClientExample {
             // This is a jobified system, so we need to tell it to handle all its outstanding tasks first
             m_Driver.ScheduleUpdate().Complete();
 
-            // Clean up connections, remove stale ones
-            for (int i = 0; i < m_Connections.Length; i++) {
-                if (!m_Connections[i].IsCreated) {
-                    m_Connections.RemoveAtSwapBack(i);
-                    // This little trick means we can alter the contents of the list without breaking/skipping instances
-                    --i;
-                }
-            }
+            CleanupDeadConnections();
 
-            // Accept new connections
-            NetworkConnection c;
-            while ((c = m_Driver.Accept()) != default(NetworkConnection)) {
-                m_Connections.Add(c);
-                Debug.Log("Accepted a connection");
-            }
+            AcceptNewConnections();
 
             DataStreamReader stream;
             for (int i = 0; i < m_Connections.Length; i++) {
@@ -192,7 +180,7 @@ namespace ChatClientExample {
 
                             // Build messages
                             string msg = $"{name} has been Disconnected (connection timed out)";
-                            //chat.NewMessage(msg, ChatCanvas.leaveColor);
+                            chat.NewMessage(msg, ChatCanvas.leaveColor);
                         
                             ChatMessage quitMsg = new ChatMessage {
                                 message = msg,
@@ -227,6 +215,31 @@ namespace ChatClientExample {
                     PingMessage pingMsg = new PingMessage();
                     SendUnicast(m_Connections[i], pingMsg);
                 }
+            }
+        }
+
+        private void CleanupDeadConnections()
+        {
+            // Clean up connections, remove stale ones
+            for (int i = 0; i < m_Connections.Length; i++)
+            {
+                if (!m_Connections[i].IsCreated)
+                {
+                    m_Connections.RemoveAtSwapBack(i);
+                    // This little trick means we can alter the contents of the list without breaking/skipping instances
+                    --i;
+                }
+            }
+        }
+
+        private void AcceptNewConnections()
+        {
+            // Accept new connections
+            NetworkConnection c;
+            while ((c = m_Driver.Accept()) != default(NetworkConnection))
+            {
+                m_Connections.Add(c);
+                Debug.Log("Accepted a connection");
             }
         }
 
@@ -281,7 +294,7 @@ namespace ChatClientExample {
             // Add to list
             serv.nameList.Add(connection, message.name);
             string msg = $"{message.name.ToString()} has joined the chat.";
-            //serv.chat.NewMessage(msg, ChatCanvas.joinColor);
+            serv.chat.NewMessage(msg, ChatCanvas.joinColor);
 
             ChatMessage chatMsg = new ChatMessage {
                 messageType = MessageType.JOIN,
@@ -301,12 +314,12 @@ namespace ChatClientExample {
                 //otherwise the host client will have multiple players with the isLocal and isServer true
                 if(playerInstance.networkId == 1)
                 {
-                    playerInstance.isServer = true;
+                    playerInstance.isServerOperator = true; //the first player in the lobby will be the server operator
                     playerInstance.isLocal = true;
                 }
                 else
                 {
-                    playerInstance.isServer = false;
+                    playerInstance.isServerOperator = false;
                     playerInstance.isLocal = false;
                 }
 
@@ -359,7 +372,7 @@ namespace ChatClientExample {
 
             if (serv.nameList.ContainsKey(connection)) {
                 string msg = $"{serv.nameList[connection]}: {receivedMsg.message}";
-                //serv.chat.NewMessage(msg, ChatCanvas.chatColor);
+                serv.chat.NewMessage(msg, ChatCanvas.chatColor);
 
                 receivedMsg.message = msg;
 
@@ -376,7 +389,7 @@ namespace ChatClientExample {
 
             if (serv.nameList.ContainsKey(connection)) {
                 string msg = $"{serv.nameList[connection]} has left the chat.";
-                //serv.chat.NewMessage(msg, ChatCanvas.leaveColor);
+                serv.chat.NewMessage(msg, ChatCanvas.leaveColor);
 
                 // Clean up
                 serv.nameList.Remove(connection);

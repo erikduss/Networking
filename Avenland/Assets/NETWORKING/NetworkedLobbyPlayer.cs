@@ -9,7 +9,7 @@ namespace ChatClientExample
 	public class NetworkedLobbyPlayer : NetworkedBehaviour
 	{
 		public bool isLocal = false;
-		public bool isServer = false;
+		public bool isServerOperator = false;
 
 		public string playerName = "Player Name";
 		[SerializeField] private TextMeshProUGUI playerNameText;
@@ -18,9 +18,9 @@ namespace ChatClientExample
 		[SerializeField] private Image playerPortrait;
 		[SerializeField] private List<Sprite> playerPortraitSprites = new List<Sprite>();
 
+		[SerializeField] private GameObject operatorIndicator;
+
 		Client client;
-		Server server;
-		LobbyManager lobbyManager;
 
 		public bool isReady = false;
 		public SpecializationType selectedSpecialization = SpecializationType.Warrior;
@@ -30,16 +30,21 @@ namespace ChatClientExample
 			{
 				client = FindObjectOfType<Client>();
 			}
-			if ( isServer ) 
-			{
-				server = FindObjectOfType<Server>();
-				lobbyManager = FindObjectOfType<LobbyManager>();
-			}
+			//if ( isServer ) 
+			//{
+			//	server = FindObjectOfType<Server>();
+			//	lobbyManager = FindObjectOfType<LobbyManager>();
+			//}
 
 			playerNameText.text = playerName;
             if (isLocal)
             {
 				transform.parent.SetAsFirstSibling();
+			}
+
+			if (isServerOperator)
+			{
+				operatorIndicator.SetActive(true);
 			}
 		}
 
@@ -60,17 +65,17 @@ namespace ChatClientExample
 				client.SendPackedMessage(readyMsg);
 			}
 
-			if (isServer)
-			{
-				//Send the ready status to all clients
-				ReadyStatusUpdateMessage readyMsg = new ReadyStatusUpdateMessage
-				{
-					networkId = this.networkId,
-					status = stat
-				};
+			//if (isServer)
+			//{
+			//	//Send the ready status to all clients
+			//	ReadyStatusUpdateMessage readyMsg = new ReadyStatusUpdateMessage
+			//	{
+			//		networkId = this.networkId,
+			//		status = stat
+			//	};
 
-				server.SendBroadcast(readyMsg);
-			}
+			//	server.SendBroadcast(readyMsg);
+			//}
 		}
 
 		public void SendSpecializationUpdate(uint spec)
@@ -85,16 +90,16 @@ namespace ChatClientExample
 				client.SendPackedMessage(specMsg);
 			}
 
-			if (isServer)
-			{
-				SpecializationUpdateMessage specMsg = new SpecializationUpdateMessage
-				{
-					networkId = this.networkId,
-					specialization = spec
-				};
+			//if (isServer)
+			//{
+			//	SpecializationUpdateMessage specMsg = new SpecializationUpdateMessage
+			//	{
+			//		networkId = this.networkId,
+			//		specialization = spec
+			//	};
 
-				server.SendBroadcast(specMsg);
-			}
+			//	server.SendBroadcast(specMsg);
+			//}
 		}
 
 		public void SetPlayerReadyStatus(bool status)

@@ -39,7 +39,7 @@ namespace ChatClientExample
         bool connected = false;
         float startTime = 0;
 
-        public static bool isServer = false;
+        public static bool isServerOperator = false;
 
         // Start is called before the first frame update
         void Start() {
@@ -190,10 +190,10 @@ namespace ChatClientExample
             {
                 NetworkedLobbyPlayer playerStat = obj.GetComponent<NetworkedLobbyPlayer>();
                 playerStat.UpdateReadyStatus(posMsg.status);
-                if (isServer)
-                {
-                    GameObject.FindObjectOfType<LobbyManager>().CheckReadyValidState();
-                }
+                //if (isServer)
+                //{
+                //    GameObject.FindObjectOfType<LobbyManager>().CheckReadyValidState();
+                //}
             }
             else
             {
@@ -222,28 +222,18 @@ namespace ChatClientExample
 
             GameObject obj;
 
-            if (!isServer)
+            if (client.networkManager.SpawnWithId(NetworkSpawnObject.PLAYERLOBBY, response.networkId, out obj))
             {
-                if (client.networkManager.SpawnWithId(NetworkSpawnObject.PLAYERLOBBY, response.networkId, out obj))
-                {
-                    NetworkedLobbyPlayer player = obj.GetComponent<NetworkedLobbyPlayer>();
-                    player.isLocal = true;
-                    player.isServer = false;
-                    player.playerName = client.GetName();
-                    GameObject parentObj = GameObject.FindGameObjectWithTag("LobbyPlayerPanel");
-                    player.transform.SetParent(parentObj.transform);
-                }
-                else
-                {
-                    Debug.LogError("Could not spawn player!");
-                }
+                NetworkedLobbyPlayer player = obj.GetComponent<NetworkedLobbyPlayer>();
+                player.isLocal = true;
+                player.isServerOperator = false;
+                player.playerName = client.GetName();
+                GameObject parentObj = GameObject.FindGameObjectWithTag("LobbyPlayerPanel");
+                player.transform.SetParent(parentObj.transform);
             }
             else
             {
-                if (isServer)
-                {
-                    GameObject.FindObjectOfType<LobbyManager>().CheckReadyValidState();
-                }
+                Debug.LogError("Could not spawn player!");
             }
         }
 
@@ -252,31 +242,21 @@ namespace ChatClientExample
 
             GameObject obj;
 
-            if (!isServer)
+            if (client.networkManager.SpawnWithId(spawnMsg.objectType, spawnMsg.networkId, out obj))
             {
-                if (client.networkManager.SpawnWithId(spawnMsg.objectType, spawnMsg.networkId, out obj))
+                //This is required to set the parent and the name of the non local player correctly in the client scene
+                NetworkedLobbyPlayer nonLocalPlayer = obj.GetComponent<NetworkedLobbyPlayer>();
+                if (nonLocalPlayer != null)
                 {
-                    //This is required to set the parent and the name of the non local player correctly in the client scene
-                    NetworkedLobbyPlayer nonLocalPlayer = obj.GetComponent<NetworkedLobbyPlayer>();
-                    if (nonLocalPlayer != null)
-                    {
-                        //Debug.Log(spawnMsg.playerName.ToString());
-                        nonLocalPlayer.playerName = spawnMsg.playerName.ToString();
-                        GameObject parentObj = GameObject.FindGameObjectWithTag("LobbyPlayerPanel");
-                        nonLocalPlayer.transform.SetParent(parentObj.transform);
-                    }
-                }
-                else
-                {
-                    Debug.LogError($"Could not spawn {spawnMsg.objectType} for id {spawnMsg.networkId}!");
+                    //Debug.Log(spawnMsg.playerName.ToString());
+                    nonLocalPlayer.playerName = spawnMsg.playerName.ToString();
+                    GameObject parentObj = GameObject.FindGameObjectWithTag("LobbyPlayerPanel");
+                    nonLocalPlayer.transform.SetParent(parentObj.transform);
                 }
             }
             else
             {
-                if (isServer)
-                {
-                    GameObject.FindObjectOfType<LobbyManager>().CheckReadyValidState();
-                }
+                Debug.LogError($"Could not spawn {spawnMsg.objectType} for id {spawnMsg.networkId}!");
             }
         }
 
@@ -286,10 +266,10 @@ namespace ChatClientExample
                 Debug.LogError($"Could not destroy object with id {destroyMsg.networkId}!");
             }
 
-            if (isServer)
-            {
-                GameObject.FindObjectOfType<LobbyManager>().CheckReadyValidState();
-            }
+            //if (isServer)
+            //{
+            //    GameObject.FindObjectOfType<LobbyManager>().CheckReadyValidState();
+            //}
         }
 
         static void HandleNetworkUpdate(Client client, MessageHeader header) {
