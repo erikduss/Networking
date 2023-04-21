@@ -22,7 +22,8 @@ namespace ChatClientExample
             { NetworkMessageType.READY_STATUS_UPDATE,       HandleReadyStatusUpdate },
             { NetworkMessageType.SPECIALIZATION_UPDATE,     HandleSpecializationUpdate },
             { NetworkMessageType.RPC,                       HandleRPC },
-            { NetworkMessageType.ASSIGN_SERVER_OPERATOR,    HandleServerOperatorAssignment }
+            { NetworkMessageType.ASSIGN_SERVER_OPERATOR,    HandleServerOperatorAssignment },
+            { NetworkMessageType.LOBBY_SPAWN,               HandleNetworkLobbySpawn }
         };
 
         public NetworkDriver m_Driver;
@@ -253,6 +254,35 @@ namespace ChatClientExample
                     nonLocalPlayer.playerName = spawnMsg.playerName.ToString();
                     GameObject parentObj = GameObject.FindGameObjectWithTag("LobbyPlayerPanel");
                     nonLocalPlayer.transform.SetParent(parentObj.transform);
+                }
+            }
+            else
+            {
+                Debug.LogError($"Could not spawn {spawnMsg.objectType} for id {spawnMsg.networkId}!");
+            }
+        }
+
+        static void HandleNetworkLobbySpawn(Client client, MessageHeader header)
+        {
+            LobbySpawnMessage spawnMsg = header as LobbySpawnMessage;
+
+            GameObject obj;
+
+            if (client.networkManager.SpawnWithId(spawnMsg.objectType, spawnMsg.networkId, out obj))
+            {
+                //This is required to set the parent and the name of the non local player correctly in the client scene
+                NetworkedLobbyPlayer nonLocalPlayer = obj.GetComponent<NetworkedLobbyPlayer>();
+                if (nonLocalPlayer != null)
+                {
+                    //Debug.Log(spawnMsg.playerName.ToString());
+                    nonLocalPlayer.playerName = spawnMsg.playerName.ToString();
+                    GameObject parentObj = GameObject.FindGameObjectWithTag("LobbyPlayerPanel");
+                    nonLocalPlayer.transform.SetParent(parentObj.transform);
+                    if(spawnMsg.isReady == 1)
+                        nonLocalPlayer.isReady = true;
+                    else
+                        nonLocalPlayer.isReady = false;
+                    nonLocalPlayer.selectedSpecialization = spawnMsg.selectedSpecialization;
                 }
             }
             else
