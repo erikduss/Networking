@@ -278,8 +278,8 @@ namespace ChatClientExample
                     nonLocalPlayer.playerName = spawnMsg.playerName.ToString();
                     GameObject parentObj = GameObject.FindGameObjectWithTag("LobbyPlayerPanel");
                     nonLocalPlayer.transform.SetParent(parentObj.transform);
-                    nonLocalPlayer.UpdateReadyStatus(spawnMsg.isReady);
-                    nonLocalPlayer.UpdateSpecialization((uint)spawnMsg.selectedSpecialization);
+                    //nonLocalPlayer.UpdateReadyStatus(spawnMsg.isReady);
+                    //nonLocalPlayer.UpdateSpecialization((uint)spawnMsg.selectedSpecialization);
                 }
             }
             else

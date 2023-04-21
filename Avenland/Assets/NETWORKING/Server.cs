@@ -368,6 +368,25 @@ namespace ChatClientExample {
                     spawnMsg.isReady = 0;
 
                 serv.SendUnicast(connection, spawnMsg);
+
+                SpecializationUpdateMessage specializationUpdateMsg = new SpecializationUpdateMessage
+                {
+                    networkId = networkId,
+                    specialization = (uint)pair.Value.selectedSpecialization
+                };
+
+                serv.SendUnicast(connection, specializationUpdateMsg);
+
+                ReadyStatusUpdateMessage readyStatusUpdateMessage = new ReadyStatusUpdateMessage
+                {
+                    networkId = networkId
+                };
+                if (pair.Value.isReady)
+                    readyStatusUpdateMessage.status = 1;
+                else
+                    readyStatusUpdateMessage.status = 0;
+
+                serv.SendUnicast(connection, readyStatusUpdateMessage);
             }
 
             // Send creation of this player to all existing players
