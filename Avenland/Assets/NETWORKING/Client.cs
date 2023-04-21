@@ -274,12 +274,16 @@ namespace ChatClientExample
                 NetworkedLobbyPlayer nonLocalPlayer = obj.GetComponent<NetworkedLobbyPlayer>();
                 if (nonLocalPlayer != null)
                 {
-                    //Debug.Log(spawnMsg.playerName.ToString());
                     nonLocalPlayer.playerName = spawnMsg.playerName.ToString();
+                    Debug.Log("Name done");
                     GameObject parentObj = GameObject.FindGameObjectWithTag("LobbyPlayerPanel");
+                    Debug.Log("found panel object");
                     nonLocalPlayer.transform.SetParent(parentObj.transform);
-                    //nonLocalPlayer.UpdateReadyStatus(spawnMsg.isReady);
-                    //nonLocalPlayer.UpdateSpecialization((uint)spawnMsg.selectedSpecialization);
+                    Debug.Log("Bound to parent");
+                    nonLocalPlayer.UpdateReadyStatus(spawnMsg.isReady);
+                    Debug.Log("Updated ready");
+                    nonLocalPlayer.UpdateSpecialization((uint)spawnMsg.selectedSpecialization);
+                    Debug.Log("Updated specialization");
                 }
             }
             else
