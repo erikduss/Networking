@@ -20,6 +20,8 @@ namespace ChatClientExample
 
 		[SerializeField] private GameObject operatorIndicator;
 
+		private GameSettings gameSettings;
+
 		Client client;
 
 		public bool isReady = false;
@@ -29,7 +31,8 @@ namespace ChatClientExample
 			if (isLocal) 
 			{
 				client = FindObjectOfType<Client>();
-			}
+				gameSettings = GameObject.FindGameObjectWithTag("GameOptions").GetComponent<GameSettings>();
+            }
 			//if ( isServer ) 
 			//{
 			//	server = FindObjectOfType<Server>();
@@ -53,6 +56,18 @@ namespace ChatClientExample
 		{
             operatorIndicator.SetActive(status);
 			isServerOperator = status;
+
+			if (isLocal)
+			{
+				if (status)
+				{
+					gameSettings.GrandOperatorPower();
+				}
+				else
+				{
+					gameSettings.TakeOperatorPower();
+				}
+			}
         }
 
 		public void SendStatusUpdate(uint stat)

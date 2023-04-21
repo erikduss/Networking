@@ -29,14 +29,24 @@ public class LobbyManager : MonoBehaviour
     void Start()
     {
         settings = GameObject.FindGameObjectWithTag("GameOptions").GetComponent<GameSettings>();
-        client = gameObject.GetComponent<Client>();
-        
-        if (settings.isHost)
+        //client = gameObject.GetComponent<Client>();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
+
+    public void SetOperatorStatus(bool status)
+    {
+        if (status)
         {
             customSeedToggle.interactable = true;
             customSeedInput.interactable = true;
             dungeonSizeDropdown.interactable = true;
             SetStartGameButton(false); //button is only interactable if all players are ready
+            CheckReadyValidState();
         }
         else
         {
@@ -47,15 +57,9 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     public void StartGame()
     {
-        if (settings.isHost)
+        if (settings.isServerOperator)
         {
             //RPC wont work, RPC is meant for calling functions on networked entities like player objects. Will be useful for moving the player to a specific location in game scene
 
@@ -80,7 +84,7 @@ public class LobbyManager : MonoBehaviour
 
     public void CheckReadyValidState()
     {
-        if (settings.isHost)
+        if (settings.isServerOperator)
         {
             List<GameObject> lobbyPlayers = new List<GameObject>();
             lobbyPlayers.AddRange(GameObject.FindGameObjectsWithTag("LobbyPlayer"));

@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class GameSettings : MonoBehaviour
 {
-    public bool isHost;
+    public bool isServerOperator;
 
     public int seed;
     public bool randomizeSeed;
@@ -18,10 +18,7 @@ public class GameSettings : MonoBehaviour
     public List<SpecializationType> chosenSpecializations;
     public List<string> playerNames;
 
-    private Server hostServer;
-    private NetworkManager hostNetworkManager;
-
-    private int lastLoadedSceneID = 0;
+    private LobbyManager lobbyManager;
 
     // Start is called before the first frame update
     void Start()
@@ -32,10 +29,10 @@ public class GameSettings : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(SceneManager.GetActiveScene().buildIndex != lastLoadedSceneID && isHost)
-        {
-            UpdateServerInfo();
-        }
+        //if(SceneManager.GetActiveScene().buildIndex != lastLoadedSceneID && isHost)
+        //{
+        //    UpdateServerInfo();
+        //}
     }
 
     public bool ValidSettings()
@@ -47,13 +44,20 @@ public class GameSettings : MonoBehaviour
         else return true;
     }
 
-    public void SetUpServer()
+    public void GrandOperatorPower()
     {
-        if (isHost)
+        if (isServerOperator)
         {
-            hostServer = gameObject.AddComponent<Server>();
-            hostNetworkManager = gameObject.GetComponent<NetworkManager>();
-            hostServer.networkManager = hostNetworkManager;
+            lobbyManager = FindObjectOfType<LobbyManager>();
+            lobbyManager.SetOperatorStatus(true);
+        }
+    }
+
+    public void TakeOperatorPower()
+    {
+        if(lobbyManager != null)
+        {
+            lobbyManager.SetOperatorStatus(false);
         }
     }
 
@@ -61,18 +65,18 @@ public class GameSettings : MonoBehaviour
     {
         switch (SceneManager.GetActiveScene().buildIndex)
         {
-            case 0:
+            //case 0:
                 
-                break;
-            case 1:
-                    hostServer.chat = GameObject.FindGameObjectWithTag("ChatCanvas").GetComponent<ChatCanvas>();
-                break;
-            case 2:
-                    hostServer.chat = GameObject.FindGameObjectWithTag("ChatCanvas").GetComponent<ChatCanvas>();
-                break;
-            case 3:
-                    hostServer.chat = GameObject.FindGameObjectWithTag("ChatCanvas").GetComponent<ChatCanvas>();
-                break;
+            //    break;
+            //case 1:
+            //        hostServer.chat = GameObject.FindGameObjectWithTag("ChatCanvas").GetComponent<ChatCanvas>();
+            //    break;
+            //case 2:
+            //        hostServer.chat = GameObject.FindGameObjectWithTag("ChatCanvas").GetComponent<ChatCanvas>();
+            //    break;
+            //case 3:
+            //        hostServer.chat = GameObject.FindGameObjectWithTag("ChatCanvas").GetComponent<ChatCanvas>();
+            //    break;
         }
     }
 }
