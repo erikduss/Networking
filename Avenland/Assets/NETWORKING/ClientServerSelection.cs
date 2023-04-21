@@ -73,7 +73,7 @@ namespace ChatClientExample
             Client.clientName = name;
             settings.playerNames.Add(name);
 
-            settings.isHost = false;
+            settings.isServerOperator = false;
 
             SceneManager.LoadScene(clientScene);
         }
