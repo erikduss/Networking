@@ -18,6 +18,7 @@ namespace ChatClientExample {
         HANDSHAKE_RESPONSE,
         CHAT_MESSAGE,
         CHAT_QUIT,
+        LOBBY_SPAWN,
         NETWORK_SPAWN,
         NETWORK_DESTROY,
         NETWORK_UPDATE_POSITION,
@@ -51,6 +52,7 @@ namespace ChatClientExample {
             { NetworkMessageType.HANDSHAKE_RESPONSE,        typeof(HandshakeResponseMessage) },
             { NetworkMessageType.CHAT_MESSAGE,              typeof(ChatMessage) },
             { NetworkMessageType.CHAT_QUIT,                 typeof(ChatQuitMessage) },
+            { NetworkMessageType.LOBBY_SPAWN,               typeof(LobbySpawnMessage) },
             { NetworkMessageType.NETWORK_SPAWN,             typeof(SpawnMessage) },
             { NetworkMessageType.NETWORK_DESTROY,           typeof(DestroyMessage) },
             { NetworkMessageType.NETWORK_UPDATE_POSITION,   typeof(UpdatePositionMessage) },
@@ -353,21 +355,36 @@ namespace ChatClientExample {
             foreach (KeyValuePair<NetworkConnection, NetworkedLobbyPlayer> pair in serv.lobbyPlayerInstances) {
                 if (pair.Key == connection) continue;
 
-                SpawnMessage spawnMsg = new SpawnMessage {
+                LobbySpawnMessage spawnMsg = new LobbySpawnMessage {
                     networkId = pair.Value.networkId,
                     objectType = NetworkSpawnObject.PLAYERLOBBY,
-                    playerName = pair.Value.playerName
+                    playerName = pair.Value.playerName,
+                    selectedSpecialization = pair.Value.selectedSpecialization
                 };
+
+                if (pair.Value.isReady)
+                    spawnMsg.isReady = 1;
+                else
+                    spawnMsg.isReady = 0;
 
                 serv.SendUnicast(connection, spawnMsg);
             }
 
             // Send creation of this player to all existing players
             if (networkId != 0) {
-                SpawnMessage spawnMsg = new SpawnMessage {
+                NetworkedLobbyPlayer tmpPlayer = player.GetComponent<NetworkedLobbyPlayer>();
+
+                LobbySpawnMessage spawnMsg = new LobbySpawnMessage {
                     networkId = networkId,
-                    objectType = NetworkSpawnObject.PLAYERLOBBY
+                    objectType = NetworkSpawnObject.PLAYERLOBBY,
+                    playerName = tmpPlayer.playerName
                 };
+
+                if (tmpPlayer.isReady)
+                    spawnMsg.isReady = 1;
+                else
+                    spawnMsg.isReady = 0;
+
                 serv.SendBroadcast(spawnMsg, connection);
 
                 AssignServerOpertorMessage operatorMessage;
