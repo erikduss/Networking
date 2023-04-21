@@ -143,6 +143,7 @@ namespace ChatClientExample
         public void ExitChat() {
             ChatQuitMessage chatQuitMsg = new ChatQuitMessage();
             if (connected) SendPackedMessage(chatQuitMsg);
+            networkManager.ClearAllNetworkReferences();
             SceneManager.LoadScene(0);
         }
         // END UI FUNCTIONS
@@ -275,15 +276,10 @@ namespace ChatClientExample
                 if (nonLocalPlayer != null)
                 {
                     nonLocalPlayer.playerName = spawnMsg.playerName.ToString();
-                    Debug.Log("Name done");
                     GameObject parentObj = GameObject.FindGameObjectWithTag("LobbyPlayerPanel");
-                    Debug.Log("found panel object");
                     nonLocalPlayer.transform.SetParent(parentObj.transform);
-                    Debug.Log("Bound to parent");
                     nonLocalPlayer.UpdateReadyStatus(spawnMsg.isReady);
-                    Debug.Log("Updated ready");
                     nonLocalPlayer.UpdateSpecialization((uint)spawnMsg.selectedSpecialization);
-                    Debug.Log("Updated specialization");
                 }
             }
             else

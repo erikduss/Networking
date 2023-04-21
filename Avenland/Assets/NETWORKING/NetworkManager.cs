@@ -41,6 +41,12 @@ public class NetworkManager : MonoBehaviour
 		}
 	}
 
+    public void ClearAllNetworkReferences()
+    {
+        nextNetworkId = 0;
+        networkedReferences.Clear();
+    }
+
     public bool DestroyWithId(uint id) {
         if (networkedReferences.ContainsKey(id)) {
             Destroy(networkedReferences[id]);
