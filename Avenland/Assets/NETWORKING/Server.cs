@@ -389,26 +389,20 @@ namespace ChatClientExample {
 
                 AssignServerOpertorMessage operatorMessage;
 
-                if(networkId == 1)
+                if(operatorID != -1)
                 {
                     operatorMessage = new AssignServerOpertorMessage
                     {
-                        networkId = networkId,
+                        networkId = (uint)operatorID,
                         isServerOperator = 1
                     };
 
-                    operatorID = 1;
+                    serv.SendUnicast(connection, operatorMessage);
                 }
                 else
                 {
-                    operatorMessage = new AssignServerOpertorMessage
-                    {
-                        networkId = networkId,
-                        isServerOperator = 0
-                    };
+                    operatorID = (int)networkId;
                 }
-
-                serv.SendBroadcast(operatorMessage);
             }
             else {
                 Debug.LogError("Invalid network id for broadcasting creation");
