@@ -76,22 +76,11 @@ public class GameSettings : MonoBehaviour
         }
     }
 
-    private void UpdateServerInfo()
+    public void HandleReadyStatusChanged()
     {
-        switch (SceneManager.GetActiveScene().buildIndex)
+        if (isServerOperator)
         {
-            //case 0:
-                
-            //    break;
-            //case 1:
-            //        hostServer.chat = GameObject.FindGameObjectWithTag("ChatCanvas").GetComponent<ChatCanvas>();
-            //    break;
-            //case 2:
-            //        hostServer.chat = GameObject.FindGameObjectWithTag("ChatCanvas").GetComponent<ChatCanvas>();
-            //    break;
-            //case 3:
-            //        hostServer.chat = GameObject.FindGameObjectWithTag("ChatCanvas").GetComponent<ChatCanvas>();
-            //    break;
+            lobbyManager.CheckReadyValidState();
         }
     }
 }

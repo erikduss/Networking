@@ -25,6 +25,11 @@ public class LobbyManager : MonoBehaviour
 
     private NetworkedLobbyPlayer localPlayer;
 
+    private void Awake()
+    {
+        SetOperatorStatus(false);
+    }
+
     // Start is called before the first frame update
     void Start()
     {

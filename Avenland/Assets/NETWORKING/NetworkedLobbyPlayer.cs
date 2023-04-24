@@ -30,6 +30,7 @@ namespace ChatClientExample
             if (isLocal)
             {
                 client = FindObjectOfType<Client>();
+                GameSettings.instance.isServerOperator = isServerOperator;
             }
 
             SetOperatorStatus(false);
@@ -69,7 +70,9 @@ namespace ChatClientExample
 
 			if (isLocal)
 			{
-				if (status)
+                GameSettings.instance.isServerOperator = isServerOperator;
+
+                if (status)
 				{
 					GameSettings.instance.GrandOperatorPower();
 				}
@@ -134,11 +137,6 @@ namespace ChatClientExample
         {
 			isReady = status;
 
-            /*if (isServer)
-            {
-				lobbyManager.CheckReadyValidState(); //THIS DOESNT PREVENT THE HOST FROM CLICKING IT IF THE OTHER PLAYER IS NOT READY AFTER BEING READY BEFORE
-			}*/
-
             if (isReady)
             {
 				readyImage.color = Color.green;
@@ -147,6 +145,9 @@ namespace ChatClientExample
             {
 				readyImage.color = Color.white;
             }
+
+			//has a check in the game settings to check if this client is the server operator.
+            GameSettings.instance.HandleReadyStatusChanged();
         }
 
 		public void UpdateReadyStatus(uint response)
