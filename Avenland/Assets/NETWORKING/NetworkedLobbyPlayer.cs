@@ -20,26 +20,34 @@ namespace ChatClientExample
 
 		[SerializeField] private GameObject operatorIndicator;
 
-		private GameSettings gameSettings;
-
 		Client client;
 
 		public bool isReady = false;
 		public SpecializationType selectedSpecialization = SpecializationType.Warrior;
 
-		private void Start() {
-			if (isLocal) 
-			{
-				client = FindObjectOfType<Client>();
-				gameSettings = GameObject.FindGameObjectWithTag("GameOptions").GetComponent<GameSettings>();
+        private void Awake()
+        {
+            if (isLocal)
+            {
+                client = FindObjectOfType<Client>();
             }
-			//if ( isServer ) 
-			//{
-			//	server = FindObjectOfType<Server>();
-			//	lobbyManager = FindObjectOfType<LobbyManager>();
-			//}
+        }
 
-			playerNameText.text = playerName;
+        private void Start() {
+            if (isLocal)
+            {
+				if(client == null)
+				{
+                    client = FindObjectOfType<Client>();
+                }
+            }
+            //if ( isServer ) 
+            //{
+            //	server = FindObjectOfType<Server>();
+            //	lobbyManager = FindObjectOfType<LobbyManager>();
+            //}
+
+            playerNameText.text = playerName;
             if (isLocal)
             {
 				transform.parent.SetAsFirstSibling();
@@ -61,11 +69,11 @@ namespace ChatClientExample
 			{
 				if (status)
 				{
-					gameSettings.GrandOperatorPower();
+					GameSettings.instance.GrandOperatorPower();
 				}
 				else
 				{
-					gameSettings.TakeOperatorPower();
+                    GameSettings.instance.TakeOperatorPower();
 				}
 			}
         }

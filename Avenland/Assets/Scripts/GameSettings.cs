@@ -6,6 +6,9 @@ using UnityEngine.SceneManagement;
 
 public class GameSettings : MonoBehaviour
 {
+    private static GameSettings _instance;
+    public static GameSettings instance { get { return _instance; } }
+
     public bool isServerOperator;
 
     public int seed;
@@ -20,10 +23,22 @@ public class GameSettings : MonoBehaviour
 
     private LobbyManager lobbyManager;
 
-    // Start is called before the first frame update
-    void Start()
+    private void Awake()
     {
-        
+        //THERE CAN ONLY BE ONE INSTANCE OF THIS SCRIPT AT ONE TIME
+        if (instance == null)
+        {
+            _instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private void Start()
+    {
+        DontDestroyOnLoad(gameObject);
     }
 
     // Update is called once per frame

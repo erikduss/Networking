@@ -317,6 +317,8 @@ namespace ChatClientExample
         {
             AssignServerOpertorMessage posMsg = header as AssignServerOpertorMessage;
 
+            Debug.Log("Checking operator status for: " + posMsg.networkId);
+
             GameObject obj;
             if (client.networkManager.GetReference(posMsg.networkId, out obj))
             {
