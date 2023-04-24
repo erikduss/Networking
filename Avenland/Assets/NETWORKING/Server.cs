@@ -402,6 +402,14 @@ namespace ChatClientExample {
                 else
                 {
                     operatorID = (int)networkId;
+
+                    operatorMessage = new AssignServerOpertorMessage
+                    {
+                        networkId = (uint)operatorID,
+                        isServerOperator = 1
+                    };
+
+                    serv.SendBroadcast(operatorMessage);
                 }
             }
             else {

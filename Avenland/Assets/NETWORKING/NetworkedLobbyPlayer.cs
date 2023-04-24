@@ -31,6 +31,8 @@ namespace ChatClientExample
             {
                 client = FindObjectOfType<Client>();
             }
+
+            SetOperatorStatus(false);
         }
 
         private void Start() {
