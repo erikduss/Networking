@@ -294,10 +294,7 @@ namespace ChatClientExample
                 Debug.LogError($"Could not destroy object with id {destroyMsg.networkId}!");
             }
 
-            //if (isServer)
-            //{
-            //    GameObject.FindObjectOfType<LobbyManager>().CheckReadyValidState();
-            //}
+            GameSettings.instance.HandleReadyStatusChanged();
         }
 
         static void HandleNetworkUpdate(Client client, MessageHeader header) {
@@ -332,11 +329,6 @@ namespace ChatClientExample
                 {
                     playerStat.SetOperatorStatus(false);
                 }
-
-                //if (isServer)
-                //{
-                //    GameObject.FindObjectOfType<LobbyManager>().CheckReadyValidState();
-                //}
             }
             else
             {
