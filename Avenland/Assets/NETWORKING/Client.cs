@@ -23,7 +23,8 @@ namespace ChatClientExample
             { NetworkMessageType.SPECIALIZATION_UPDATE,     HandleSpecializationUpdate },
             { NetworkMessageType.RPC,                       HandleRPC },
             { NetworkMessageType.ASSIGN_SERVER_OPERATOR,    HandleServerOperatorAssignment },
-            { NetworkMessageType.LOBBY_SPAWN,               HandleNetworkLobbySpawn }
+            { NetworkMessageType.LOBBY_SPAWN,               HandleNetworkLobbySpawn },
+            { NetworkMessageType.CHANGE_SCENE,              HandleNetworkSceneChange }
         };
 
         public NetworkDriver m_Driver;
@@ -308,6 +309,15 @@ namespace ChatClientExample
             else {
                 Debug.LogError($"Could not find object with id {posMsg.networkId}!");
             }
+        }
+
+        static void HandleNetworkSceneChange(Client client, MessageHeader header)
+        {
+            //Change scene to received scene index!
+
+            ChangeSceneMessage sceneMsg = header as ChangeSceneMessage;
+
+            GameSettings.instance.SwitchToScene(((int)sceneMsg.sceneID));
         }
 
         static void HandleServerOperatorAssignment(Client client, MessageHeader header)

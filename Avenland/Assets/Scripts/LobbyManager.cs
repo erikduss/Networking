@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class LobbyManager : MonoBehaviour
@@ -84,6 +85,14 @@ public class LobbyManager : MonoBehaviour
             //    networkId = localPlayer.networkId
             //};
             //client.SendPackedMessage(rpcMsg);
+
+            ChangeSceneMessage sceneMsg = new ChangeSceneMessage
+            {
+                networkId = localPlayer.networkId,
+                sceneID = (uint)SceneManager.GetSceneByName("GameScene").buildIndex
+            };
+
+            client.SendPackedMessage(sceneMsg);
         }
     }
 

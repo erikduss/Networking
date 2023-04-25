@@ -83,4 +83,9 @@ public class GameSettings : MonoBehaviour
             lobbyManager.CheckReadyValidState();
         }
     }
+
+    public void SwitchToScene(int sceneID)
+    {
+        SceneManager.LoadScene(sceneID);
+    }
 }

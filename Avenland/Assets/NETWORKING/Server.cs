@@ -28,7 +28,8 @@ namespace ChatClientExample {
         RPC,
         READY_STATUS_UPDATE,
         SPECIALIZATION_UPDATE,
-        ASSIGN_SERVER_OPERATOR
+        ASSIGN_SERVER_OPERATOR,
+        CHANGE_SCENE
     }
 
     public enum MessageType
@@ -62,7 +63,8 @@ namespace ChatClientExample {
             { NetworkMessageType.READY_STATUS_UPDATE,       typeof(ReadyStatusUpdateMessage) },
             { NetworkMessageType.SPECIALIZATION_UPDATE,     typeof(SpecializationUpdateMessage) },
             { NetworkMessageType.RPC,                       typeof(RPCMessage) },
-            { NetworkMessageType.ASSIGN_SERVER_OPERATOR,    typeof(AssignServerOpertorMessage) }
+            { NetworkMessageType.ASSIGN_SERVER_OPERATOR,    typeof(AssignServerOpertorMessage) },
+            { NetworkMessageType.CHANGE_SCENE,              typeof(ChangeSceneMessage) }
         };
     }
 
@@ -75,7 +77,8 @@ namespace ChatClientExample {
             { NetworkMessageType.INPUT_UPDATE,  HandleClientInput },
             { NetworkMessageType.READY_STATUS_UPDATE, HandleClientReadyStatus },
             { NetworkMessageType.SPECIALIZATION_UPDATE, HandleClientSpecialization },
-            { NetworkMessageType.PONG,          HandleClientPong }
+            { NetworkMessageType.PONG,          HandleClientPong },
+            { NetworkMessageType.CHANGE_SCENE,  HandleClientSceneChange }
         };
 
         public NetworkDriver m_Driver;
@@ -92,6 +95,8 @@ namespace ChatClientExample {
         public static ushort ServerPort = 9000;
 
         public static int operatorID = -1;
+
+        public static int minimumAmountOfPlayersRequiredToStart = 2;
 
         void Start() {
             // Create Driver
@@ -551,6 +556,44 @@ namespace ChatClientExample {
                 {
                     serv.lobbyPlayerInstances[connection].UpdateReadyStatus(inputMsg.status);
                     serv.SendBroadcast(inputMsg);
+                }
+                else
+                {
+                    Debug.LogError("NetworkID Mismatch for Player Input");
+                }
+            }
+            else
+            {
+                Debug.LogError("Received player ready status from unlisted connection");
+            }
+        }
+
+        static void HandleClientSceneChange(Server serv, NetworkConnection connection, MessageHeader header)
+        {
+            ChangeSceneMessage inputMsg = header as ChangeSceneMessage;
+
+            if (serv.lobbyPlayerInstances.ContainsKey(connection))
+            {
+                if (serv.lobbyPlayerInstances[connection].networkId == inputMsg.networkId)
+                {
+                    if (serv.lobbyPlayerInstances[connection].isServerOperator)
+                    {
+                        bool canStart = true;
+                        foreach(NetworkedLobbyPlayer player in serv.lobbyPlayerInstances.Values)
+                            if (!player.isReady) canStart = false;
+
+                        if(serv.lobbyPlayerInstances.Values.Count < Server.minimumAmountOfPlayersRequiredToStart)
+                            canStart = false;
+
+                        if (canStart)
+                            serv.SendBroadcast(inputMsg);
+
+                        //change the server to game view mode too.
+                    }
+                    else
+                    {
+                        Debug.LogError("Received scene change command from a non server operator!");
+                    }
                 }
                 else
                 {
