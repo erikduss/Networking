@@ -96,7 +96,7 @@ namespace ChatClientExample {
 
         public static int operatorID = -1;
 
-        public static int minimumAmountOfPlayersRequiredToStart = 2;
+        public static int minimumAmountOfPlayersRequiredToStart = 1;
 
         void Start() {
             // Create Driver
@@ -584,6 +584,8 @@ namespace ChatClientExample {
 
                         if(serv.lobbyPlayerInstances.Values.Count < Server.minimumAmountOfPlayersRequiredToStart)
                             canStart = false;
+
+                        Debug.Log("Can start:: " + canStart);
 
                         if (canStart)
                             serv.SendBroadcast(inputMsg);

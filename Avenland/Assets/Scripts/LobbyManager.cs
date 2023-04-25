@@ -22,7 +22,6 @@ public class LobbyManager : MonoBehaviour
     private GameSettings settings;
 
     private bool readyState = false;
-    private Client client;
 
     private NetworkedLobbyPlayer localPlayer;
 
@@ -89,10 +88,10 @@ public class LobbyManager : MonoBehaviour
             ChangeSceneMessage sceneMsg = new ChangeSceneMessage
             {
                 networkId = localPlayer.networkId,
-                sceneID = (uint)SceneManager.GetSceneByName("GameScene").buildIndex
+                sceneID = 2
             };
 
-            client.SendPackedMessage(sceneMsg);
+            Client.instance.SendPackedMessage(sceneMsg);
         }
     }
 

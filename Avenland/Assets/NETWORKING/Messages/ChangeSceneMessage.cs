@@ -13,7 +13,7 @@ namespace ChatClientExample
 			}
 		}
 
-		public uint sceneID; //0 is not ready, 1 is ready
+		public uint sceneID; 
 		public uint networkId;
 
 		public override void SerializeObject(ref DataStreamWriter writer) {

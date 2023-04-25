@@ -44,6 +44,23 @@ namespace ChatClientExample
 
         public static bool isServerOperator = false;
 
+        private static Client _instance;
+
+        public static Client instance { get { return _instance; } }
+
+        private void Awake()
+        {
+            //THERE CAN ONLY BE ONE INSTANCE OF THIS SCRIPT AT ONE TIME
+            if (instance == null)
+            {
+                _instance = this;
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+        }
+
         // Start is called before the first frame update
         void Start() {
             startTime = Time.time;
@@ -318,6 +335,16 @@ namespace ChatClientExample
             ChangeSceneMessage sceneMsg = header as ChangeSceneMessage;
 
             GameSettings.instance.SwitchToScene(((int)sceneMsg.sceneID));
+
+            /*
+             * TODO FOR NEXT TIME:
+             * 
+             * Scene switching destroys the connection to the server.
+             * Make sure the client and server stay connected and every player is reconnected to the server.
+             * 
+             * 
+             * 
+             */
         }
 
         static void HandleServerOperatorAssignment(Client client, MessageHeader header)
