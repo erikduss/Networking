@@ -86,11 +86,12 @@ namespace ChatClientExample {
         private NativeList<NetworkConnection> m_Connections;
 
         private Dictionary<NetworkConnection, string> nameList = new Dictionary<NetworkConnection, string>();
+        private Dictionary<NetworkConnection, SpecializationType> chosenSpecializations = new Dictionary<NetworkConnection, SpecializationType>();
         private Dictionary<NetworkConnection, NetworkedLobbyPlayer> lobbyPlayerInstances = new Dictionary<NetworkConnection, NetworkedLobbyPlayer>();
         private Dictionary<NetworkConnection, PingPong> pongDict = new Dictionary<NetworkConnection, PingPong>();
 
         public ChatCanvas chat;
-        public NetworkManager networkManager;
+        private NetworkManager networkManager;
 
         public static ushort ServerPort = 9000;
 
@@ -117,6 +118,8 @@ namespace ChatClientExample {
             Debug.Log("Started server on port: " + endpoint.Port);
 
             m_Connections = new NativeList<NetworkConnection>(64, Allocator.Persistent);
+
+            networkManager = GameObject.FindGameObjectWithTag("GameOptions").GetComponent<NetworkManager>();
         }
 
         // Write this immediately after creating the above Start calls, so you don't forget
@@ -179,6 +182,11 @@ namespace ChatClientExample {
                             // FIXME: for some reason, sometimes this isn't in the list?
                             if (nameList.ContainsKey(m_Connections[i])) {
                                 nameList.Remove(m_Connections[i]);
+                            }
+
+                            if (chosenSpecializations.ContainsKey(m_Connections[i]))
+                            {
+                                chosenSpecializations.Remove(m_Connections[i]);
                             }
 
                             uint destroyId = lobbyPlayerInstances[m_Connections[i]].networkId;
@@ -308,6 +316,7 @@ namespace ChatClientExample {
 
             // Add to list
             serv.nameList.Add(connection, message.name);
+            serv.chosenSpecializations.Add(connection, SpecializationType.Warrior);//Default
             string msg = $"{message.name.ToString()} has joined the chat.";
             serv.chat.NewMessage(msg, ChatCanvas.joinColor);
 
@@ -494,6 +503,12 @@ namespace ChatClientExample {
 
                 // Clean up
                 serv.nameList.Remove(connection);
+
+                if (serv.chosenSpecializations.ContainsKey(connection))
+                {
+                    serv.chosenSpecializations.Remove(connection);
+                }
+
                 // if you join and quit quickly, might not be in this dict yet
                 if (serv.pongDict.ContainsKey(connection)) {
                     serv.pongDict.Remove(connection);
@@ -588,7 +603,13 @@ namespace ChatClientExample {
                         Debug.Log("Can start:: " + canStart);
 
                         if (canStart)
+                        {
                             serv.SendBroadcast(inputMsg);
+                            Debug.Log("Switching to scene with seed:: " + inputMsg.gameSeed);
+                            Debug.Log("THE SERVER HAS:: " + serv.nameList.Count + " Player names & " + serv.chosenSpecializations.Count + " Specializations");
+                            DontDestroyConnection.instance.SwitchToScene((int)inputMsg.sceneID, (int)inputMsg.gameSeed);
+                        }
+                            
 
                         //change the server to game view mode too.
                     }
@@ -617,6 +638,7 @@ namespace ChatClientExample {
                 if (serv.lobbyPlayerInstances[connection].networkId == specMsg.networkId)
                 {
                     serv.lobbyPlayerInstances[connection].UpdateSpecialization(specMsg.specialization);
+                    serv.chosenSpecializations[connection] = (SpecializationType)((int)specMsg.specialization);
                     serv.SendBroadcast(specMsg);
                 }
                 else

@@ -5,10 +5,12 @@ using UnityEngine;
 public class SetSeed : MonoBehaviour
 {
     public int seed;
-    public bool randomizeSeed;
+    public bool randomizeSeed = false;
 
-    private void Awake()
+    public void SetNewSeed(int newSeed)
     {
+        seed = newSeed;
+
         if (randomizeSeed)
         {
             seed = Random.Range(0,99999);

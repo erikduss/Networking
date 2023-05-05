@@ -207,7 +207,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1163648932}
+      - m_Target: {fileID: 1083644988}
         m_TargetAssemblyTypeName: LobbyManager, Assembly-CSharp
         m_MethodName: ReadyButtonClicked
         m_Mode: 1
@@ -790,7 +790,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1163648932}
+      - m_Target: {fileID: 1083644988}
         m_TargetAssemblyTypeName: LobbyManager, Assembly-CSharp
         m_MethodName: StartGame
         m_Mode: 1
@@ -3830,6 +3830,57 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!1 &1083644987
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1083644989}
+  - component: {fileID: 1083644988}
+  m_Layer: 0
+  m_Name: Lobby manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1083644988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1083644987}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a85797fd28375f47a120f6f5b28f3b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  customSeedToggle: {fileID: 1336126703}
+  customSeedInput: {fileID: 1760558528}
+  dungeonSizeDropdown: {fileID: 2019923336}
+  readyButtonImage: {fileID: 25891022}
+  readyButtonText: {fileID: 600217359}
+  startGameButton: {fileID: 149592821}
+  specializationButtonText: {fileID: 1193924610}
+--- !u!4 &1083644989
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1083644987}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1115340340
 GameObject:
   m_ObjectHideFlags: 0
@@ -4383,7 +4434,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1163648929}
   - component: {fileID: 1163648931}
-  - component: {fileID: 1163648932}
+  - component: {fileID: 1163648933}
+  - component: {fileID: 1163648934}
   m_Layer: 0
   m_Name: NetworkConnection
   m_TagString: Untagged
@@ -4421,7 +4473,7 @@ MonoBehaviour:
   Done: 0
   chatCanvas: {fileID: 1377917194}
   input: {fileID: 1115340342}
---- !u!114 &1163648932
+--- !u!114 &1163648933
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4430,16 +4482,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 1163648928}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4a85797fd28375f47a120f6f5b28f3b9, type: 3}
+  m_Script: {fileID: 11500000, guid: a32f0539f6447e340a9e8da7bef75387, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  customSeedToggle: {fileID: 1336126703}
-  customSeedInput: {fileID: 1760558528}
-  dungeonSizeDropdown: {fileID: 2019923336}
-  readyButtonImage: {fileID: 25891022}
-  readyButtonText: {fileID: 600217359}
-  startGameButton: {fileID: 149592821}
-  specializationButtonText: {fileID: 1193924610}
+--- !u!114 &1163648934
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1163648928}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e67faa8654891e42b48041034cf5e02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  seed: 0
+  randomizeSeed: 0
 --- !u!1 &1193924608
 GameObject:
   m_ObjectHideFlags: 0
@@ -6962,7 +7021,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   infoTitleText: {fileID: 1155126739}
   infoText: {fileID: 370813812}
-  lobbyManager: {fileID: 1163648932}
+  lobbyManager: {fileID: 1083644988}
 --- !u!4 &1774221927
 Transform:
   m_ObjectHideFlags: 0

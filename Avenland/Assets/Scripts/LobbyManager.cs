@@ -85,10 +85,18 @@ public class LobbyManager : MonoBehaviour
             //};
             //client.SendPackedMessage(rpcMsg);
 
+            uint seed;
+
+            if (customSeedToggle.isOn && customSeedInput.text.Length > 0)
+                seed = (uint)customSeedInput.text.GetHashCode();
+            else
+                seed = (uint)Random.Range(0, 99999);
+
             ChangeSceneMessage sceneMsg = new ChangeSceneMessage
             {
                 networkId = localPlayer.networkId,
-                sceneID = 2
+                sceneID = 2,
+                gameSeed = seed
             };
 
             Client.instance.SendPackedMessage(sceneMsg);

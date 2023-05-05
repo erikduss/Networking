@@ -15,6 +15,7 @@ namespace ChatClientExample
 
 		public uint sceneID; 
 		public uint networkId;
+		public uint gameSeed;
 
 		public override void SerializeObject(ref DataStreamWriter writer) {
 			// very important to call this first
@@ -22,6 +23,7 @@ namespace ChatClientExample
 
 			writer.WriteUInt(networkId);
 			writer.WriteUInt(sceneID);
+			writer.WriteUInt(gameSeed);
 		}
 
 		public override void DeserializeObject(ref DataStreamReader reader) {
@@ -30,6 +32,8 @@ namespace ChatClientExample
 
 			networkId = reader.ReadUInt();
             sceneID = reader.ReadUInt();
-		}
+			gameSeed = reader.ReadUInt();
+
+        }
 	}
 }

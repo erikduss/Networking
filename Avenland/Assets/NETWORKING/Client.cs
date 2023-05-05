@@ -334,17 +334,9 @@ namespace ChatClientExample
 
             ChangeSceneMessage sceneMsg = header as ChangeSceneMessage;
 
-            GameSettings.instance.SwitchToScene(((int)sceneMsg.sceneID));
+            DontDestroyConnection.instance.SwitchToScene(((int)sceneMsg.sceneID), (int)sceneMsg.gameSeed);
 
-            /*
-             * TODO FOR NEXT TIME:
-             * 
-             * Scene switching destroys the connection to the server.
-             * Make sure the client and server stay connected and every player is reconnected to the server.
-             * 
-             * 
-             * 
-             */
+            //client.networkManager.RespawnPlayersInGameScene();
         }
 
         static void HandleServerOperatorAssignment(Client client, MessageHeader header)

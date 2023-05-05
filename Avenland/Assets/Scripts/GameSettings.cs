@@ -22,6 +22,8 @@ public class GameSettings : MonoBehaviour
     public List<string> playerNames;
 
     private LobbyManager lobbyManager;
+    private UIManager uiManager;
+    private NetworkManager networkManager;
 
     private void Awake()
     {
@@ -84,8 +86,13 @@ public class GameSettings : MonoBehaviour
         }
     }
 
-    public void SwitchToScene(int sceneID)
+    public void SetUpGameScene()
     {
-        SceneManager.LoadScene(sceneID);
+        networkManager = GetComponent<NetworkManager>();
+        uiManager = FindObjectOfType<UIManager>();
+
+        Debug.Log(amountOfPlayers + " _ " + chosenSpecializations.Count + " _ " + playerNames.Count);
+
+        uiManager.SetPlayerHUD(amountOfPlayers, chosenSpecializations, playerNames);
     }
 }
