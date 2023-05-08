@@ -9,6 +9,7 @@ public class NetworkedGamePlayer : NetworkedBehaviour
 {
     public bool isLocal = false;
     public bool isServerOperator = false;
+    public bool isPlayersTurn = false;
 
     public string playerName = "Player Name";
 

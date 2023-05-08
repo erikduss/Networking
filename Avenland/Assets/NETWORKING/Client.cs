@@ -359,8 +359,9 @@ namespace ChatClientExample
 
                     nonLocalPlayer.networkId = spawnMsg.networkId;
                     nonLocalPlayer.playerName = spawnMsg.playerName.ToString();
-                    Debug.Log(spawnMsg.selectedSpecialization);
                     nonLocalPlayer.selectedSpecialization = spawnMsg.selectedSpecialization;
+                    if(spawnMsg.isPlayersTurn == 1)
+                        nonLocalPlayer.isPlayersTurn = true;
                 }
             }
             else
