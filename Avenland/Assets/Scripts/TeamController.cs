@@ -113,10 +113,11 @@ public class TeamController : MonoBehaviour
     public void UpdateTeam()
     {
         GameObject spec;
+        amountOfExtraPlayers = 0;
 
         foreach(NetworkedGamePlayer player in players)
         {
-            if (player.isLocal)
+            if (player.isLocal || amountOfExtraPlayers >= 4)//The server wont spawn a local
             {
                 spec = specializationGameobjects[(int)player.selectedSpecialization-1];
                 spec.SetActive(true);
