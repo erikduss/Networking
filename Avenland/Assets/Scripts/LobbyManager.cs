@@ -99,8 +99,6 @@ public class LobbyManager : MonoBehaviour
                 gameSeed = seed
             };
 
-            Debug.Log(sceneMsg.networkId + " _ " + sceneMsg.sceneID + " _ " + sceneMsg.gameSeed);
-
             Client.instance.SendPackedMessage(sceneMsg);
         }
     }
