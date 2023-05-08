@@ -94,10 +94,12 @@ public class LobbyManager : MonoBehaviour
 
             ChangeSceneMessage sceneMsg = new ChangeSceneMessage
             {
-                networkId = localPlayer.networkId,
+                networkId = GameSettings.instance.localPlayerID,
                 sceneID = 2,
                 gameSeed = seed
             };
+
+            Debug.Log(sceneMsg.networkId + " _ " + sceneMsg.sceneID + " _ " + sceneMsg.gameSeed);
 
             Client.instance.SendPackedMessage(sceneMsg);
         }
