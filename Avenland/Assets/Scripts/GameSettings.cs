@@ -95,6 +95,6 @@ public class GameSettings : MonoBehaviour
 
         Debug.Log(amountOfPlayers + " _ " + chosenSpecializations.Count + " _ " + playerNames.Count);
 
-        uiManager.SetPlayerHUD(amountOfPlayers, chosenSpecializations, playerNames);
+        //uiManager.SetPlayerHUD(amountOfPlayers, chosenSpecializations, playerNames);
     }
 }

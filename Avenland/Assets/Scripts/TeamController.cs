@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class TeamController : MonoBehaviour
 {
+    private static TeamController _instance;
+    public static TeamController instance { get { return _instance; } }
+
     private GameObject teamObject;
     private GameManager gameManager;
 
@@ -15,7 +18,24 @@ public class TeamController : MonoBehaviour
 
     [SerializeField] private List<GameObject> specializationGameobjects;
     private Vector3 hostPosition = new Vector3(0,0,0);
-    private Vector3 additionalPlayer_1_position = new Vector3(0.6f, 0.22f);
+
+    private List<Vector3> additionalPlayerPositions = new List<Vector3>();
+
+    public List<NetworkedGamePlayer> players = new List<NetworkedGamePlayer>();
+    private int amountOfExtraPlayers = 0;
+
+    private void Awake()
+    {
+        //THERE CAN ONLY BE ONE INSTANCE OF THIS SCRIPT AT ONE TIME
+        if (instance == null)
+        {
+            _instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -25,7 +45,9 @@ public class TeamController : MonoBehaviour
 
         settings = GameObject.FindGameObjectWithTag("GameOptions").GetComponent<GameSettings>();
 
-        SetupTeam();
+        additionalPlayerPositions.Add(new Vector3(0.6f, 0.22f));
+        additionalPlayerPositions.Add(new Vector3(0.6f, 0.22f));
+        additionalPlayerPositions.Add(new Vector3(0.6f, 0.22f));
     }
 
     // Update is called once per frame
@@ -88,39 +110,62 @@ public class TeamController : MonoBehaviour
         return true;
     }
 
-    private void SetupTeam()
+    public void UpdateTeam()
     {
         GameObject spec;
 
-        for (int i = 0; i< settings.chosenSpecializations.Count; i++)
+        foreach(NetworkedGamePlayer player in players)
         {
-            switch (i)
+            if (player.isLocal)
             {
-                case 0:
-                        spec = specializationGameobjects[((int)settings.chosenSpecializations[i])-1];
-                        spec.SetActive(true);
-                        spec.transform.localPosition = hostPosition;
-                        spec.GetComponent<SpriteRenderer>().sortingOrder = 4;
-                    break;
-                case 1:
-                        spec = specializationGameobjects[((int)settings.chosenSpecializations[i])-1];
-                        spec.SetActive(true);
-                        spec.transform.localPosition = additionalPlayer_1_position;
-                        spec.GetComponent<SpriteRenderer>().sortingOrder = 3;
-                    break;
-                case 2:
-                        spec = specializationGameobjects[((int)settings.chosenSpecializations[i])- 1];
-                        spec.SetActive(true);
-                        spec.transform.localPosition = additionalPlayer_1_position;
-                        spec.GetComponent<SpriteRenderer>().sortingOrder = 2;
-                    break;
-                case 3:
-                        spec = specializationGameobjects[((int)settings.chosenSpecializations[i]) -1];
-                        spec.SetActive(true);
-                        spec.transform.localPosition = additionalPlayer_1_position;
-                        spec.GetComponent<SpriteRenderer>().sortingOrder = 1;
-                    break;
+                spec = specializationGameobjects[(int)player.selectedSpecialization];
+                spec.SetActive(true);
+                spec.transform.localPosition = hostPosition;
+                spec.GetComponent<SpriteRenderer>().sortingOrder = 4;
+
+                UIManager.instance.SetPlayerHUD(0, player.selectedSpecialization, player.playerName);
+            }
+            else
+            {
+                amountOfExtraPlayers++;
+                spec = specializationGameobjects[(int)player.selectedSpecialization];
+                spec.SetActive(true);
+                spec.transform.localPosition = additionalPlayerPositions[amountOfExtraPlayers-1];
+                spec.GetComponent<SpriteRenderer>().sortingOrder = (4- amountOfExtraPlayers);
+
+                UIManager.instance.SetPlayerHUD(amountOfExtraPlayers, player.selectedSpecialization, player.playerName);
             }
         }
+
+        //for (int i = 0; i< settings.chosenSpecializations.Count; i++)
+        //{
+        //    switch (i)
+        //    {
+        //        case 0:
+        //                spec = specializationGameobjects[((int)settings.chosenSpecializations[i])-1];
+        //                spec.SetActive(true);
+        //                spec.transform.localPosition = hostPosition;
+        //                spec.GetComponent<SpriteRenderer>().sortingOrder = 4;
+        //            break;
+        //        case 1:
+        //                spec = specializationGameobjects[((int)settings.chosenSpecializations[i])-1];
+        //                spec.SetActive(true);
+        //                spec.transform.localPosition = additionalPlayer_1_position;
+        //                spec.GetComponent<SpriteRenderer>().sortingOrder = 3;
+        //            break;
+        //        case 2:
+        //                spec = specializationGameobjects[((int)settings.chosenSpecializations[i])- 1];
+        //                spec.SetActive(true);
+        //                spec.transform.localPosition = additionalPlayer_1_position;
+        //                spec.GetComponent<SpriteRenderer>().sortingOrder = 2;
+        //            break;
+        //        case 3:
+        //                spec = specializationGameobjects[((int)settings.chosenSpecializations[i]) -1];
+        //                spec.SetActive(true);
+        //                spec.transform.localPosition = additionalPlayer_1_position;
+        //                spec.GetComponent<SpriteRenderer>().sortingOrder = 1;
+        //            break;
+        //    }
+        //}
     }
 }

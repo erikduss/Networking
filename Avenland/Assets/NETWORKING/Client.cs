@@ -362,6 +362,9 @@ namespace ChatClientExample
                     nonLocalPlayer.selectedSpecialization = spawnMsg.selectedSpecialization;
                     if(spawnMsg.isPlayersTurn == 1)
                         nonLocalPlayer.isPlayersTurn = true;
+
+                    TeamController.instance.players.Add(nonLocalPlayer);
+                    TeamController.instance.UpdateTeam();
                 }
             }
             else

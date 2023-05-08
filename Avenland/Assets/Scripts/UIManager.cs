@@ -6,6 +6,9 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
+    private static UIManager _instance;
+    public static UIManager instance { get { return _instance; } }
+
     [SerializeField] List<GameObject> playerHUD = new List<GameObject>();
     [SerializeField] List<Image> playerHeroImages = new List<Image>();
     [SerializeField] List<Slider> playerHealthSliders = new List<Slider>();
@@ -13,10 +16,23 @@ public class UIManager : MonoBehaviour
 
     [SerializeField] List<Sprite> secializationHeroImages = new List<Sprite>();
 
+    private void Awake()
+    {
+        //THERE CAN ONLY BE ONE INSTANCE OF THIS SCRIPT AT ONE TIME
+        if (instance == null)
+        {
+            _instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-
+        DisablePortraits();
     }
 
     // Update is called once per frame
@@ -25,57 +41,37 @@ public class UIManager : MonoBehaviour
         
     }
 
-    public void SetPlayerHUD(int amountOfPlayers, List<SpecializationType> specs, List<string> playerNames)
+    public void SetPlayerHUD(int playerID, SpecializationType spec, string playerName)
     {
-        SetPlayerImage(amountOfPlayers, specs);
-        SetPlayerName(amountOfPlayers, playerNames);
-        DisableLeftOverPortraits(amountOfPlayers);
+        EnablePlayerHUD(playerID);
+        SetPlayerImage(playerID, spec);
+        SetPlayerName(playerID, playerName);
+        
     }
 
-    private void DisableLeftOverPortraits(int amountOfPlayers)
+    private void DisablePortraits()
     {
-        if(amountOfPlayers < playerHUD.Count)
+        for (int i = 0; i < playerHUD.Count; i++)
         {
-            for(int i= amountOfPlayers; i< playerHUD.Count; i++)
-            {
-                playerHUD[i].SetActive(false);
-            }
+            playerHUD[i].SetActive(false);
         }
     }
 
-    private void SetPlayerImage(int amountOfPlayers, List<SpecializationType> specs)
+    private void EnablePlayerHUD(int playerID)
+    {
+        playerHUD[playerID].SetActive(true);
+    }
+
+    private void SetPlayerImage(int playerID, SpecializationType spec)
     {
         Sprite img;
 
-        for (int i = 0; i < amountOfPlayers; i++)
-        {
-            switch (i)
-            {
-                case 0:
-                        img = secializationHeroImages[((int)specs[i]) - 1];
-                        playerHeroImages[i].sprite = img;
-                    break;
-                case 1:
-                        img = secializationHeroImages[((int)specs[i]) - 1];
-                        playerHeroImages[i].sprite = img;
-                    break;
-                case 2:
-                        img = secializationHeroImages[((int)specs[i]) - 1];
-                        playerHeroImages[i].sprite = img;
-                    break;
-                case 3:
-                        img = secializationHeroImages[((int)specs[i]) - 1];
-                        playerHeroImages[i].sprite = img;
-                    break;
-            }
-        }
+        img = secializationHeroImages[(int)spec];
+        playerHeroImages[playerID].sprite = img;
     }
 
-    private void SetPlayerName(int amountOfPlayers, List<string> playerNames)
+    private void SetPlayerName(int playerID, string playerName)
     {
-        for (int i = 0; i < amountOfPlayers; i++)
-        {
-            playerNameTexts[i].text = playerNames[i];
-        }
+        playerNameTexts[playerID].text = playerName;
     }
 }
