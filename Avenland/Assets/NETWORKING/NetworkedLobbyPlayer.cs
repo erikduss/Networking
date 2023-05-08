@@ -31,6 +31,7 @@ namespace ChatClientExample
             {
                 client = FindObjectOfType<Client>();
                 GameSettings.instance.isServerOperator = isServerOperator;
+				GameSettings.instance.localPlayerID = networkId;
             }
 
             SetOperatorStatus(false);
@@ -42,6 +43,7 @@ namespace ChatClientExample
 				if(client == null)
 				{
                     client = FindObjectOfType<Client>();
+                    GameSettings.instance.localPlayerID = networkId;
                 }
             }
             //if ( isServer ) 

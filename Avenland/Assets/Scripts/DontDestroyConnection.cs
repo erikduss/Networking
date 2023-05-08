@@ -1,3 +1,4 @@
+using ChatClientExample;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,6 +10,8 @@ public class DontDestroyConnection : MonoBehaviour
     public static DontDestroyConnection instance { get { return _instance; } }
 
     private SetSeed seedSetter;
+
+    public bool isServer = false;
 
     void Awake()
     {
@@ -37,9 +40,30 @@ public class DontDestroyConnection : MonoBehaviour
 
         if (scene.buildIndex == 0) Destroy(gameObject);
 
-        if(scene.name == "GameScene")
+        if (!isServer)
         {
-            GameSettings.instance.SetUpGameScene();
+            //Send to the server if we loaded into the correct scene
+            LoadedGameMessage loadMessage;
+            if (scene.name == "GameScene")
+            {
+                loadMessage = new LoadedGameMessage
+                {
+                    networkId = GameSettings.instance.localPlayerID,
+                    status = 1
+                };
+                GameSettings.instance.SetUpGameScene();
+            }
+            else
+            {
+                loadMessage = new LoadedGameMessage
+                {
+                    networkId = GameSettings.instance.localPlayerID,
+                    status = 0
+                };
+            }
+
+            //server also has this so this gives an error.
+            Client.instance.SendPackedMessage(loadMessage);
         }
     }
 

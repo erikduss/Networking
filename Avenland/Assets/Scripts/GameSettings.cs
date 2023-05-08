@@ -9,6 +9,8 @@ public class GameSettings : MonoBehaviour
     private static GameSettings _instance;
     public static GameSettings instance { get { return _instance; } }
 
+    public uint localPlayerID;
+
     public bool isServerOperator;
 
     public int seed;

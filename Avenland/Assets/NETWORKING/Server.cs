@@ -5,7 +5,6 @@ using Unity.Networking.Transport;
 using Unity.Collections;
 using Unity.Networking.Transport.Utilities;
 using System.Linq;
-using UnityEngine.Networking.Types;
 
 namespace ChatClientExample {
 
@@ -29,7 +28,9 @@ namespace ChatClientExample {
         READY_STATUS_UPDATE,
         SPECIALIZATION_UPDATE,
         ASSIGN_SERVER_OPERATOR,
-        CHANGE_SCENE
+        CHANGE_SCENE,
+        GAME_SPAWN,
+        CLIENT_LOADED_GAME
     }
 
     public enum MessageType
@@ -64,7 +65,9 @@ namespace ChatClientExample {
             { NetworkMessageType.SPECIALIZATION_UPDATE,     typeof(SpecializationUpdateMessage) },
             { NetworkMessageType.RPC,                       typeof(RPCMessage) },
             { NetworkMessageType.ASSIGN_SERVER_OPERATOR,    typeof(AssignServerOpertorMessage) },
-            { NetworkMessageType.CHANGE_SCENE,              typeof(ChangeSceneMessage) }
+            { NetworkMessageType.CHANGE_SCENE,              typeof(ChangeSceneMessage) },
+            { NetworkMessageType.GAME_SPAWN,                typeof(GameSpawnMessage) },
+            { NetworkMessageType.CLIENT_LOADED_GAME,        typeof(LoadedGameMessage) }
         };
     }
 
@@ -78,7 +81,8 @@ namespace ChatClientExample {
             { NetworkMessageType.READY_STATUS_UPDATE, HandleClientReadyStatus },
             { NetworkMessageType.SPECIALIZATION_UPDATE, HandleClientSpecialization },
             { NetworkMessageType.PONG,          HandleClientPong },
-            { NetworkMessageType.CHANGE_SCENE,  HandleClientSceneChange }
+            { NetworkMessageType.CHANGE_SCENE,  HandleClientSceneChange },
+            { NetworkMessageType.CLIENT_LOADED_GAME, HandleClientGameLoad }
         };
 
         public NetworkDriver m_Driver;
@@ -87,6 +91,7 @@ namespace ChatClientExample {
 
         private Dictionary<NetworkConnection, string> nameList = new Dictionary<NetworkConnection, string>();
         private Dictionary<NetworkConnection, SpecializationType> chosenSpecializations = new Dictionary<NetworkConnection, SpecializationType>();
+        private Dictionary<NetworkConnection, NetworkedGamePlayer> gamePlayerInstances = new Dictionary<NetworkConnection, NetworkedGamePlayer>();
         private Dictionary<NetworkConnection, NetworkedLobbyPlayer> lobbyPlayerInstances = new Dictionary<NetworkConnection, NetworkedLobbyPlayer>();
         private Dictionary<NetworkConnection, PingPong> pongDict = new Dictionary<NetworkConnection, PingPong>();
 
@@ -98,6 +103,9 @@ namespace ChatClientExample {
         public static int operatorID = -1;
 
         public static int minimumAmountOfPlayersRequiredToStart = 1;
+
+        public static int playerIDTurn = -1;
+        public static int playersConnectedToGame = 0;
 
         void Start() {
             // Create Driver
@@ -600,12 +608,34 @@ namespace ChatClientExample {
                         if(serv.lobbyPlayerInstances.Values.Count < Server.minimumAmountOfPlayersRequiredToStart)
                             canStart = false;
 
-                        Debug.Log("Can start:: " + canStart);
-
                         if (canStart)
                         {
+                            foreach(var player in serv.lobbyPlayerInstances)
+                            {
+                                //Add all lobby players to a new list of gamescene players with the correct data (names etc).
+                                GameObject gamePlayer;
+                                uint networkId = 0;
+                                if (serv.networkManager.ReplaceGameobjectWithNew(NetworkSpawnObject.PLAYERGAME, player.Value.networkId, out gamePlayer))
+                                {
+                                    // Get and setup player instance
+                                    NetworkedGamePlayer playerInstance = gamePlayer.GetComponent<NetworkedGamePlayer>();
+
+                                    playerInstance.transform.parent = FindObjectOfType<DontDestroyConnection>().transform;
+                                    playerInstance.playerName = player.Value.playerName;
+                                    playerInstance.selectedSpecialization = player.Value.selectedSpecialization;
+                                    networkId = playerInstance.networkId;
+
+                                    serv.gamePlayerInstances.Add(connection, playerInstance);
+                                    Debug.Log("Replaced :: " + networkId + " Player");
+                                }
+                                else
+                                {
+                                    Debug.LogError("Could not spawn player instance");
+                                }
+
+                            }
+
                             serv.SendBroadcast(inputMsg);
-                            Debug.Log("Switching to scene with seed:: " + inputMsg.gameSeed);
                             Debug.Log("THE SERVER HAS:: " + serv.nameList.Count + " Player names & " + serv.chosenSpecializations.Count + " Specializations");
                             DontDestroyConnection.instance.SwitchToScene((int)inputMsg.sceneID, (int)inputMsg.gameSeed);
                         }
@@ -620,6 +650,59 @@ namespace ChatClientExample {
                 }
                 else
                 {
+                    Debug.LogError("NetworkID Mismatch for Player Input");
+                }
+            }
+            else
+            {
+                Debug.LogError("Received player ready status from unlisted connection");
+            }
+        }
+
+        static void HandleClientGameLoad(Server serv, NetworkConnection connection, MessageHeader header)
+        {
+            LoadedGameMessage loadMsg = header as LoadedGameMessage;
+
+            if (serv.gamePlayerInstances.ContainsKey(connection))
+            {
+                if (serv.gamePlayerInstances[connection].networkId == loadMsg.networkId)
+                {
+                    playersConnectedToGame++;
+                    Debug.Log("We do have a player with the ID:: " + loadMsg.networkId + "____ We now have:: " + playersConnectedToGame + " Players");
+
+                    //ALL PLAYERS NEED TO BE CONNECTED TO MAKE SURE EVERYONE GETS THE BROADCAST.
+                    if(playersConnectedToGame == serv.gamePlayerInstances.Count)
+                    {
+                        //Lets decide who should start!
+                        int playerThatStarts = Random.Range(0, serv.gamePlayerInstances.Count);
+                        int currentPlayer = 0;
+
+                        //here we need to send all player info back to all players!
+                        foreach (var inst in serv.gamePlayerInstances)
+                        {
+                            GameSpawnMessage spawnMsg = new GameSpawnMessage
+                            {
+                                networkId = inst.Value.networkId,
+                                objectType = NetworkSpawnObject.PLAYERGAME,
+                                playerName = inst.Value.playerName,
+                                selectedSpecialization = inst.Value.selectedSpecialization
+                            };
+
+                            if (currentPlayer == playerThatStarts)
+                                spawnMsg.isPlayersTurn = 1;
+                            else
+                                spawnMsg.isPlayersTurn = 0;
+
+                            currentPlayer++;
+
+                            serv.SendBroadcast(spawnMsg);
+                        }
+                    }
+                }
+                else
+                {
+                    Debug.Log(serv.gamePlayerInstances[connection].networkId + "___" + loadMsg.networkId);
+
                     Debug.LogError("NetworkID Mismatch for Player Input");
                 }
             }

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class NetworkManager : MonoBehaviour
@@ -20,7 +21,7 @@ public class NetworkManager : MonoBehaviour
         return false;
 	}
 
-    public bool SpawnWithId( NetworkSpawnObject type, uint id, out GameObject obj ) {
+    public bool SpawnWithId(NetworkSpawnObject type, uint id, out GameObject obj ) {
         obj = null;
         if ( networkedReferences.ContainsKey(id)) {
             return false;
@@ -40,6 +41,31 @@ public class NetworkManager : MonoBehaviour
             return true;
 		}
 	}
+
+    public bool ReplaceGameobjectWithNew(NetworkSpawnObject type, uint id, out GameObject obj)
+    {
+        obj = null;
+        if (!networkedReferences.ContainsKey(id))
+        {
+            return false;
+        }
+        else
+        {
+            // assuming this doesn't crash...
+            obj = GameObject.Instantiate(spawnInfo.prefabList[(int)type]);
+
+            NetworkedBehaviour beh = obj.GetComponent<NetworkedBehaviour>();
+            if (beh == null)
+            {
+                beh = obj.AddComponent<NetworkedBehaviour>();
+            }
+            beh.networkId = id;
+
+            networkedReferences[id] = obj;
+
+            return true;
+        }
+    }
 
     public void ClearAllNetworkReferences()
     {

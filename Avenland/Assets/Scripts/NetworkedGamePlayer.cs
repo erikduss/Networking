@@ -7,8 +7,6 @@ using UnityEngine.UI;
 
 public class NetworkedGamePlayer : NetworkedBehaviour
 {
-    public GameObject playerLobbyPrefab;
-
     public bool isLocal = false;
     public bool isServerOperator = false;
 
@@ -20,6 +18,11 @@ public class NetworkedGamePlayer : NetworkedBehaviour
 
     private void Awake()
     {
+        if(networkId == GameSettings.instance.localPlayerID)
+        {
+            isLocal = true;
+        }
+
         if (isLocal)
         {
             client = FindObjectOfType<Client>();

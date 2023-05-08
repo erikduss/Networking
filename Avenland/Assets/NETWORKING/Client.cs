@@ -24,7 +24,8 @@ namespace ChatClientExample
             { NetworkMessageType.RPC,                       HandleRPC },
             { NetworkMessageType.ASSIGN_SERVER_OPERATOR,    HandleServerOperatorAssignment },
             { NetworkMessageType.LOBBY_SPAWN,               HandleNetworkLobbySpawn },
-            { NetworkMessageType.CHANGE_SCENE,              HandleNetworkSceneChange }
+            { NetworkMessageType.CHANGE_SCENE,              HandleNetworkSceneChange },
+            { NetworkMessageType.GAME_SPAWN,                HandleNetworkGameSpawn }
         };
 
         public NetworkDriver m_Driver;
@@ -337,6 +338,35 @@ namespace ChatClientExample
             DontDestroyConnection.instance.SwitchToScene(((int)sceneMsg.sceneID), (int)sceneMsg.gameSeed);
 
             //client.networkManager.RespawnPlayersInGameScene();
+        }
+
+        static void HandleNetworkGameSpawn(Client client, MessageHeader header)
+        {
+            GameSpawnMessage spawnMsg = header as GameSpawnMessage;
+
+            GameObject obj;
+
+            if (client.networkManager.ReplaceGameobjectWithNew(spawnMsg.objectType, spawnMsg.networkId, out obj))
+            {
+                //This is required to set the parent and the name of the non local player correctly in the client scene
+                NetworkedGamePlayer nonLocalPlayer = obj.GetComponent<NetworkedGamePlayer>();
+                if (nonLocalPlayer != null)
+                {
+                    if (spawnMsg.networkId == GameSettings.instance.localPlayerID) nonLocalPlayer.isLocal = true;
+
+                    GameObject parentObj = FindObjectOfType<DontDestroyConnection>().transform.gameObject;
+                    nonLocalPlayer.transform.SetParent(parentObj.transform);
+
+                    nonLocalPlayer.networkId = spawnMsg.networkId;
+                    nonLocalPlayer.playerName = spawnMsg.playerName.ToString();
+                    Debug.Log(spawnMsg.selectedSpecialization);
+                    nonLocalPlayer.selectedSpecialization = spawnMsg.selectedSpecialization;
+                }
+            }
+            else
+            {
+                Debug.LogError($"Could not spawn {spawnMsg.objectType} for id {spawnMsg.networkId}!");
+            }
         }
 
         static void HandleServerOperatorAssignment(Client client, MessageHeader header)
