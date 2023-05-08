@@ -96,7 +96,7 @@ public class GameManager : MonoBehaviour
 
         enemies = levelGeneration.GenerateEnemies(dungeonSizeX, dungeonSizeY, playerScript.playerLocation);
 
-        uiManager.SetPlayerHUD(settings.amountOfPlayers, settings.chosenSpecializations, settings.playerNames);
+        //uiManager.SetPlayerHUD(settings.amountOfPlayers, settings.chosenSpecializations, settings.playerNames);
 
         SetTurn(playerID);
     }
