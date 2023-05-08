@@ -23,14 +23,7 @@ public class TeamController : MonoBehaviour
         teamObject = this.gameObject;
         gameManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameManager>();
 
-        try
-        {
-            settings = GameObject.FindGameObjectWithTag("GameOptions").GetComponent<GameSettings>();
-        }
-        catch
-        {
-            settings = GameObject.FindGameObjectWithTag("GameOptionsTest").GetComponent<GameSettings>(); ;
-        }
+        settings = GameObject.FindGameObjectWithTag("GameOptions").GetComponent<GameSettings>();
 
         SetupTeam();
     }

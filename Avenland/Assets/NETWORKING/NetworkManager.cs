@@ -51,8 +51,11 @@ public class NetworkManager : MonoBehaviour
         }
         else
         {
-            NetworkedGamePlayer tempPlayer = networkedReferences[id].GetComponent<NetworkedGamePlayer>();
-            if (tempPlayer != null) return false;
+            if(networkedReferences[id] != null)
+            {
+                NetworkedGamePlayer tempPlayer = networkedReferences[id].GetComponent<NetworkedGamePlayer>();
+                if (tempPlayer != null) return false;
+            }
 
             // assuming this doesn't crash...
             obj = GameObject.Instantiate(spawnInfo.prefabList[(int)type]);

@@ -625,6 +625,7 @@ namespace ChatClientExample {
                                     playerInstance.selectedSpecialization = player.Value.selectedSpecialization;
                                     networkId = playerInstance.networkId;
 
+                                    //player.key = the player's connection
                                     serv.gamePlayerInstances.Add(player.Key, playerInstance);
                                     Debug.Log("Replaced :: " + networkId + " Player");
                                 }
