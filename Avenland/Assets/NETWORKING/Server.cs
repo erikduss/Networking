@@ -697,6 +697,13 @@ namespace ChatClientExample {
                             currentPlayer++;
 
                             serv.SendBroadcast(spawnMsg);
+
+                            //Spawn them for the server
+                            if (inst.Value != null)
+                            {
+                                TeamController.instance.players.Add(inst.Value);
+                                TeamController.instance.UpdateTeam();
+                            }
                         }
                     }
                 }

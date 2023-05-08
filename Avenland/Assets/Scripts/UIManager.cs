@@ -66,7 +66,7 @@ public class UIManager : MonoBehaviour
     {
         Sprite img;
 
-        img = secializationHeroImages[(int)spec];
+        img = secializationHeroImages[(int)spec-1];
         playerHeroImages[playerID].sprite = img;
     }
 

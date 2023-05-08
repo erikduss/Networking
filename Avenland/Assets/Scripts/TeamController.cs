@@ -118,7 +118,7 @@ public class TeamController : MonoBehaviour
         {
             if (player.isLocal)
             {
-                spec = specializationGameobjects[(int)player.selectedSpecialization];
+                spec = specializationGameobjects[(int)player.selectedSpecialization-1];
                 spec.SetActive(true);
                 spec.transform.localPosition = hostPosition;
                 spec.GetComponent<SpriteRenderer>().sortingOrder = 4;
@@ -128,7 +128,7 @@ public class TeamController : MonoBehaviour
             else
             {
                 amountOfExtraPlayers++;
-                spec = specializationGameobjects[(int)player.selectedSpecialization];
+                spec = specializationGameobjects[(int)player.selectedSpecialization-1];
                 spec.SetActive(true);
                 spec.transform.localPosition = additionalPlayerPositions[amountOfExtraPlayers-1];
                 spec.GetComponent<SpriteRenderer>().sortingOrder = (4- amountOfExtraPlayers);
