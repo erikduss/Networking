@@ -25,7 +25,8 @@ namespace ChatClientExample
             { NetworkMessageType.ASSIGN_SERVER_OPERATOR,    HandleServerOperatorAssignment },
             { NetworkMessageType.LOBBY_SPAWN,               HandleNetworkLobbySpawn },
             { NetworkMessageType.CHANGE_SCENE,              HandleNetworkSceneChange },
-            { NetworkMessageType.GAME_SPAWN,                HandleNetworkGameSpawn }
+            { NetworkMessageType.GAME_SPAWN,                HandleNetworkGameSpawn },
+            { NetworkMessageType.UPDATE_SWITCH_TURN,        HandleNeworkTurnUpdate }
         };
 
         public NetworkDriver m_Driver;
@@ -397,6 +398,14 @@ namespace ChatClientExample
             {
                 Debug.LogError($"Could not find object with id {posMsg.networkId}!");
             }
+        }
+
+        static void HandleNeworkTurnUpdate(Client client, MessageHeader header)
+        {
+            UpdateAndSwitchTurnMessage switchMsg = header as UpdateAndSwitchTurnMessage;
+
+            TeamController.instance.SetTurn((int)switchMsg.networkId);
+            TeamController.instance.UpdateTeamPosition((TeamMoveDirection)switchMsg.moveDirection);
         }
 
         static void HandleChatMessage(Client client, MessageHeader header) {

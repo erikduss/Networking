@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    private static GameManager _instance;
+    public static GameManager instance { get { return _instance; } }
+
     private GameSettings settings;
     private RandomGeneration levelGeneration;
 
@@ -20,33 +23,37 @@ public class GameManager : MonoBehaviour
     private int maxLargeDungeonSize = 251;
 
     private GameObject playerObject;
-    private TeamController playerScript;
 
     private int playerID = 0;
     private int playerTurn = 0;
 
-    private List<EnemyController> enemies = new List<EnemyController>();
+    public List<EnemyController> enemies = new List<EnemyController>();
     private UIManager uiManager;
+
+    private void Awake()
+    {
+        //THERE CAN ONLY BE ONE INSTANCE OF THIS SCRIPT AT ONE TIME
+        if (instance == null)
+        {
+            _instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     // Start is called before the first frame update
     void Start()
     {
         //If changing to scene switching, remove
-        try
-        {
-            settings = GameObject.FindGameObjectWithTag("GameOptions").GetComponent<GameSettings>();
-        }
-        catch
-        {
-            settings = GameObject.FindGameObjectWithTag("GameOptionsTest").GetComponent<GameSettings>(); ;
-        }
+        settings = GameObject.FindGameObjectWithTag("GameOptions").GetComponent<GameSettings>();
 
         levelGeneration = GameObject.FindGameObjectWithTag("LevelGenerator").GetComponent<RandomGeneration>();
 
         uiManager = GetComponent<UIManager>();
 
         playerObject = GameObject.FindGameObjectWithTag("Player");
-        playerScript = playerObject.GetComponent<TeamController>();
 
         int randX = 0;
         int randY = 0;
@@ -83,7 +90,7 @@ public class GameManager : MonoBehaviour
 
         playerObject.transform.position = playerSpawnLocation;
 
-        playerScript.playerLocation = new Vector2(playerSpawnLocation.x / 1.28f, playerSpawnLocation.y / 1.28f);
+        TeamController.instance.playerLocation = new Vector2(playerSpawnLocation.x / 1.28f, playerSpawnLocation.y / 1.28f);
 
         levelGeneration.amountOfDoors = ((int)settings.dungeonSize + 1) * 2;
 
@@ -94,34 +101,8 @@ public class GameManager : MonoBehaviour
         levelGeneration.GenerateFloor(new Vector3(0, 0, 0), GenerationDirection.BOTTOM_RIGHT, FloorType.FLOOR_BLANK_1, dungeonSizeX, dungeonSizeY);
         levelGeneration.GenerateWalls(new Vector3(0, 0, 0), dungeonSizeX, dungeonSizeY);
 
-        enemies = levelGeneration.GenerateEnemies(dungeonSizeX, dungeonSizeY, playerScript.playerLocation);
+        enemies = levelGeneration.GenerateEnemies(dungeonSizeX, dungeonSizeY, TeamController.instance.playerLocation);
 
         //uiManager.SetPlayerHUD(settings.amountOfPlayers, settings.chosenSpecializations, settings.playerNames);
-
-        SetTurn(playerID);
-    }
-
-    public void SetTurn(int turn)
-    {
-        playerTurn = turn;
-
-        if(playerTurn == playerID)
-        {
-            playerScript.isPlayersTurn = true;
-        }
-        else
-        {
-            playerScript.isPlayersTurn = false;
-        }
-    }
-
-    public void EndPlayerTurn()
-    {
-        foreach(EnemyController enemy in enemies)
-        {
-            enemy.LookForNearbyPlayer(playerScript.playerLocation);
-        }
-
-        SetTurn(playerID); //the server needs to decide who's turn it is.
     }
 }

@@ -5,6 +5,8 @@ using Unity.Networking.Transport;
 using Unity.Collections;
 using Unity.Networking.Transport.Utilities;
 using System.Linq;
+using UnityEngine.UIElements;
+using UnityEngine.EventSystems;
 
 namespace ChatClientExample {
 
@@ -30,7 +32,9 @@ namespace ChatClientExample {
         ASSIGN_SERVER_OPERATOR,
         CHANGE_SCENE,
         GAME_SPAWN,
-        CLIENT_LOADED_GAME
+        CLIENT_LOADED_GAME,
+        CLIENT_END_TURN,
+        UPDATE_SWITCH_TURN
     }
 
     public enum MessageType
@@ -67,7 +71,9 @@ namespace ChatClientExample {
             { NetworkMessageType.ASSIGN_SERVER_OPERATOR,    typeof(AssignServerOpertorMessage) },
             { NetworkMessageType.CHANGE_SCENE,              typeof(ChangeSceneMessage) },
             { NetworkMessageType.GAME_SPAWN,                typeof(GameSpawnMessage) },
-            { NetworkMessageType.CLIENT_LOADED_GAME,        typeof(LoadedGameMessage) }
+            { NetworkMessageType.CLIENT_LOADED_GAME,        typeof(LoadedGameMessage) },
+            { NetworkMessageType.CLIENT_END_TURN,           typeof(EndTurnMessage) },
+            { NetworkMessageType.UPDATE_SWITCH_TURN,        typeof(UpdateAndSwitchTurnMessage) }
         };
     }
 
@@ -82,7 +88,8 @@ namespace ChatClientExample {
             { NetworkMessageType.SPECIALIZATION_UPDATE, HandleClientSpecialization },
             { NetworkMessageType.PONG,          HandleClientPong },
             { NetworkMessageType.CHANGE_SCENE,  HandleClientSceneChange },
-            { NetworkMessageType.CLIENT_LOADED_GAME, HandleClientGameLoad }
+            { NetworkMessageType.CLIENT_LOADED_GAME, HandleClientGameLoad },
+            { NetworkMessageType.CLIENT_END_TURN, HandleClientEndTurn }
         };
 
         public NetworkDriver m_Driver;
@@ -104,7 +111,7 @@ namespace ChatClientExample {
 
         public static int minimumAmountOfPlayersRequiredToStart = 1;
 
-        public static int playerIDTurn = -1;
+        public static uint playerIDTurn = 100;
         public static int playersConnectedToGame = 0;
 
         void Start() {
@@ -690,7 +697,10 @@ namespace ChatClientExample {
                             };
 
                             if (currentPlayer == playerThatStarts)
+                            {
                                 spawnMsg.isPlayersTurn = 1;
+                                playerIDTurn = inst.Value.networkId;
+                            }
                             else
                                 spawnMsg.isPlayersTurn = 0;
 
@@ -701,16 +711,62 @@ namespace ChatClientExample {
                             //Spawn them for the server
                             if (inst.Value != null)
                             {
+                                TeamController.instance.isServer = true;
                                 TeamController.instance.players.Add(inst.Value);
                                 TeamController.instance.UpdateTeam();
                             }
                         }
+
+                        UpdateAndSwitchTurnMessage turnMsg = new UpdateAndSwitchTurnMessage {
+                            networkId = playerIDTurn,
+                            moveDirection = (uint)TeamMoveDirection.NONE
+                        };
+
+                        serv.SendBroadcast(turnMsg);
                     }
                 }
                 else
                 {
                     Debug.Log(serv.gamePlayerInstances[connection].networkId + "___" + loadMsg.networkId);
 
+                    Debug.LogError("NetworkID Mismatch for Player Input");
+                }
+            }
+            else
+            {
+                Debug.LogError("Received player ready status from unlisted connection");
+            }
+        }
+
+        static void HandleClientEndTurn(Server serv, NetworkConnection connection, MessageHeader header)
+        {
+            EndTurnMessage etMsg = header as EndTurnMessage;
+
+            if (serv.gamePlayerInstances.ContainsKey(connection))
+            {
+                if (serv.gamePlayerInstances[connection].networkId == etMsg.networkId)
+                {
+                    TeamMoveDirection dir = (TeamMoveDirection)etMsg.moveDirection;
+                    if (TeamController.instance.ServerCheckNewPositionValid(dir))
+                    {
+                        //a message for the approved input + the ID of the person to switch the turn to!
+                        playerIDTurn = TeamController.instance.GetNextPlayerTurnID();
+
+                        UpdateAndSwitchTurnMessage turnMsg = new UpdateAndSwitchTurnMessage
+                        {
+                            networkId = playerIDTurn,
+                            moveDirection = etMsg.moveDirection
+                        };
+
+                        serv.SendBroadcast(turnMsg);
+                    }
+                    else
+                    {
+                        Debug.LogError("Movement given by client is NOT valid");
+                    }
+                }
+                else
+                {
                     Debug.LogError("NetworkID Mismatch for Player Input");
                 }
             }

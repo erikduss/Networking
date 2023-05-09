@@ -62,16 +62,13 @@ public class DontDestroyConnection : MonoBehaviour
                 };
             }
 
-            //server also has this so this gives an error.
+            //Send a message to the server that we loaded into the game.
             Client.instance.SendPackedMessage(loadMessage);
         }
     }
 
     public void SwitchToScene(int sceneID, int seed)
     {
-
-
-        Debug.Log("The seed is:: " + seed);
         seedSetter.SetNewSeed(seed);
         SceneManager.LoadScene(sceneID);
     }
