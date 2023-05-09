@@ -203,10 +203,12 @@ public class TeamController : MonoBehaviour
             if (player.networkId != currentPlayerTurn)
             {
                 player.isPlayersTurn = false;
+                UIManager.instance.SetPlayerTurnStatus(players.IndexOf(player), false);
             }
             else
             {
                 player.isPlayersTurn = true;
+                UIManager.instance.SetPlayerTurnStatus(players.IndexOf(player), true);
             }
         }
     }
@@ -231,6 +233,20 @@ public class TeamController : MonoBehaviour
         else
         {
             IDToReturn = players[currentPlayerIndex + 1].networkId;
+        }
+
+        currentPlayerTurn = (int)IDToReturn;
+
+        foreach(var player in players)
+        {
+            if(player.networkId == IDToReturn)
+            {
+                UIManager.instance.SetPlayerTurnStatus(players.IndexOf(player), true);
+            }
+            else
+            {
+                UIManager.instance.SetPlayerTurnStatus(players.IndexOf(player), false);
+            }
         }
 
         return IDToReturn;

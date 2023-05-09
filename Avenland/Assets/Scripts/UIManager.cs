@@ -11,6 +11,7 @@ public class UIManager : MonoBehaviour
 
     [SerializeField] List<GameObject> playerHUD = new List<GameObject>();
     [SerializeField] List<Image> playerHeroImages = new List<Image>();
+    [SerializeField] List<Image> playerTurnStatus = new List<Image>();
     [SerializeField] List<Slider> playerHealthSliders = new List<Slider>();
     [SerializeField] List<TextMeshProUGUI> playerNameTexts = new List<TextMeshProUGUI>();
 
@@ -73,5 +74,17 @@ public class UIManager : MonoBehaviour
     private void SetPlayerName(int playerID, string playerName)
     {
         playerNameTexts[playerID].text = playerName;
+    }
+
+    public void SetPlayerTurnStatus(int playerID, bool status)
+    {
+        if (status)
+        {
+            playerTurnStatus[playerID].color = Color.green;
+        }
+        else
+        {
+            playerTurnStatus[playerID].color = Color.red;
+        }
     }
 }

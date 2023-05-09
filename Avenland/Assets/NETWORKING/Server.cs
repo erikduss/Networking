@@ -752,6 +752,8 @@ namespace ChatClientExample {
                         //a message for the approved input + the ID of the person to switch the turn to!
                         playerIDTurn = TeamController.instance.GetNextPlayerTurnID();
 
+                        Debug.Log("Players turn:: " + playerIDTurn);
+
                         UpdateAndSwitchTurnMessage turnMsg = new UpdateAndSwitchTurnMessage
                         {
                             networkId = playerIDTurn,

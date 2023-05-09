@@ -234,6 +234,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dungeonSizeX: 0
   dungeonSizeY: 0
+  enemies: []
 --- !u!4 &139791837
 Transform:
   m_ObjectHideFlags: 0
@@ -271,6 +272,11 @@ MonoBehaviour:
   - {fileID: 707220579}
   - {fileID: 289857244}
   - {fileID: 1081045811}
+  playerTurnStatus:
+  - {fileID: 615341156}
+  - {fileID: 608713503}
+  - {fileID: 1082851437}
+  - {fileID: 393351253}
   playerHealthSliders:
   - {fileID: 1647277719}
   - {fileID: 641627172}
@@ -3211,12 +3217,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerLocation: {x: 0, y: 0}
+  isServer: 0
   isPlayersTurn: 1
   specializationGameobjects:
   - {fileID: 829526887}
   - {fileID: 1086618648}
   - {fileID: 1885766789}
   - {fileID: 1438953838}
+  players: []
 --- !u!1 &1289447355
 GameObject:
   m_ObjectHideFlags: 0
