@@ -92,10 +92,12 @@ public class LobbyManager : MonoBehaviour
             else
                 seed = (uint)Random.Range(0, 99999);
 
+            uint gameSceneID = (uint)SceneManager.GetSceneByName("GameScene").buildIndex;
+
             ChangeSceneMessage sceneMsg = new ChangeSceneMessage
             {
                 networkId = GameSettings.instance.localPlayerID,
-                sceneID = 2,
+                sceneID = gameSceneID,
                 gameSeed = seed
             };
 

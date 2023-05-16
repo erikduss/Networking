@@ -36,9 +36,7 @@ public class DontDestroyConnection : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        Debug.Log("Loaded scene: " + scene.buildIndex);
-
-        if (scene.buildIndex == 0) Destroy(gameObject);
+        if (scene.name == "MainMenu" || scene.name == "LoginScene") Destroy(gameObject);
 
         if (!isServer)
         {

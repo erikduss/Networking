@@ -44,6 +44,8 @@ namespace ChatClientExample
         bool connected = false;
         float startTime = 0;
 
+        private string mainMenuSceneName = "MainMenu";
+
         public static bool isServerOperator = false;
 
         private static Client _instance;
@@ -98,7 +100,7 @@ namespace ChatClientExample
             m_Driver.ScheduleUpdate().Complete();
 
             if (!connected && Time.time - startTime > 5f) {
-                SceneManager.LoadScene(0);
+                SceneManager.LoadScene(mainMenuSceneName);
             }
 
             if (!m_Connection.IsCreated) {
@@ -164,7 +166,7 @@ namespace ChatClientExample
             ChatQuitMessage chatQuitMsg = new ChatQuitMessage();
             if (connected) SendPackedMessage(chatQuitMsg);
             networkManager.ClearAllNetworkReferences();
-            SceneManager.LoadScene(0);
+            SceneManager.LoadScene(mainMenuSceneName);
         }
         // END UI FUNCTIONS
 
