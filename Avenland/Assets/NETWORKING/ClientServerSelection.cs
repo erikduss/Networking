@@ -11,7 +11,7 @@ namespace ChatClientExample
     public class ClientServerSelection : MonoBehaviour
     {
         public string serverScene, clientScene;
-        public TMP_InputField serverIPInput, nameInput, serverPort;
+        public TMP_InputField serverIPInput, nameInput, serverPort, clientPortInput;
         private GameSettings settings;
 
 		private void Start() {
@@ -56,12 +56,24 @@ namespace ChatClientExample
 
         public void GoClient() {
             NetworkEndPoint endPoint;
-            if (NetworkEndPoint.TryParse(serverIPInput.text, 9000, out endPoint, NetworkFamily.Ipv4)) {
+
+            ushort servPort = 9000; //default
+
+            if (clientPortInput.text.Length > 0)
+            {
+                string text = clientPortInput.text;
+                int val = int.Parse(text);
+                servPort = (ushort)val;
+            }
+
+            if (NetworkEndPoint.TryParse(serverIPInput.text, servPort, out endPoint, NetworkFamily.Ipv4)) {
                 Client.serverIP = serverIPInput.text;
             }
             else {
                 Client.serverIP = "127.0.0.1";
             }
+
+            Client.serverPort = servPort;
 
             string name = nameInput.text;
             if (string.IsNullOrEmpty(nameInput.text)) {

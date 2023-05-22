@@ -26,7 +26,8 @@ namespace ChatClientExample
             { NetworkMessageType.LOBBY_SPAWN,               HandleNetworkLobbySpawn },
             { NetworkMessageType.CHANGE_SCENE,              HandleNetworkSceneChange },
             { NetworkMessageType.GAME_SPAWN,                HandleNetworkGameSpawn },
-            { NetworkMessageType.UPDATE_SWITCH_TURN,        HandleNeworkTurnUpdate }
+            { NetworkMessageType.UPDATE_SWITCH_TURN,        HandleNeworkTurnUpdate },
+            { NetworkMessageType.END_GAME,                  HandleEndGameMessage }
         };
 
         public NetworkDriver m_Driver;
@@ -39,6 +40,7 @@ namespace ChatClientExample
         public ChatCanvas chatCanvas;
 
         public static string serverIP;
+        public static ushort serverPort;
         public static string clientName = "";
 
         bool connected = false;
@@ -76,8 +78,8 @@ namespace ChatClientExample
 
             m_Connection = default(NetworkConnection);
 
-            var endpoint = NetworkEndPoint.Parse(serverIP, 9000, NetworkFamily.Ipv4);
-            endpoint.Port = 9000; //1511
+            var endpoint = NetworkEndPoint.Parse(serverIP, serverPort, NetworkFamily.Ipv4);
+            endpoint.Port = serverPort; //1511
             m_Connection = m_Driver.Connect(endpoint);
 
             networkManager = GameObject.FindGameObjectWithTag("GameOptions").GetComponent<NetworkManager>();
@@ -425,6 +427,30 @@ namespace ChatClientExample
 
             PongMessage pongMsg = new PongMessage();
             client.SendPackedMessage(pongMsg);
+        }
+
+        static void HandleEndGameMessage(Client client, MessageHeader header)
+        {
+            EndGameMessage endMsg = header as EndGameMessage;
+
+            if(TeamController.instance != null)
+            {
+                bool escaped = false;
+
+                if(endMsg.teamEscaped == 1)
+                {
+                    escaped = true;
+                }
+                else
+                {
+                    escaped = false;
+                }
+
+                TeamController.instance.GameEnded = true;
+                TeamController.instance.HasEscaped = escaped;
+
+                TeamController.instance.FinishGame();
+            }
         }
     }
 }

@@ -23,6 +23,12 @@ public class TeamController : MonoBehaviour
 
     public Vector2 playerLocation;
 
+    public int TeamHealth = 100;
+    public int PersonalScore = 0;
+    public bool HasEscaped = false;
+
+    public bool GameEnded = false;
+
     public bool isServer = false;
     public bool isPlayersTurn = false;
     private int currentPlayerTurn;
@@ -37,6 +43,8 @@ public class TeamController : MonoBehaviour
     public List<NetworkedGamePlayer> players = new List<NetworkedGamePlayer>();
     private NetworkedGamePlayer localPlayer;
     private int amountOfExtraPlayers = 0;
+
+    private Server serv;
 
     private void Awake()
     {
@@ -62,12 +70,17 @@ public class TeamController : MonoBehaviour
         additionalPlayerPositions.Add(new Vector3(0.6f, 0.22f));
         additionalPlayerPositions.Add(new Vector3(0.6f, 0.22f));
         additionalPlayerPositions.Add(new Vector3(0.6f, 0.22f));
+
+        if (isServer) serv = FindObjectOfType<Server>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        CheckInputs();
+        if(TeamHealth > 0 && !GameEnded)
+        {
+            CheckInputs();
+        }
     }
 
     private void CheckInputs()
@@ -143,14 +156,101 @@ public class TeamController : MonoBehaviour
                 break;
         }
 
+        PersonalScore += 20; //get 20 points for each team move.
+
         HandleEnemyDetection();
+        HandleDoorDetection();
+
+        CheckTeamState();
     }
 
     private void HandleEnemyDetection()
     {
+        int numberOfEnemiesAround = 0;
+
         foreach (EnemyController enemy in GameManager.instance.enemies)
         {
-            enemy.LookForNearbyPlayer(playerLocation);
+            if (enemy.LookForNearbyPlayer(playerLocation))
+            {
+                numberOfEnemiesAround++;
+
+                PersonalScore += 50; //Get 50 points for getting hit by an enemy. (danger points)
+
+                //if adding other types of enemies that do more dmg etc, add it onto a totaldamage int instead of number of enemies.
+            }
+        }
+
+        if(numberOfEnemiesAround > 0)
+        {
+            //WE'RE TAKING DAMAGE!
+            int damageTaken = numberOfEnemiesAround * 20;
+            TeamHealth -= damageTaken;
+            if (TeamHealth < 0) TeamHealth = 0;
+        }
+    }
+
+    private void CheckTeamState()
+    {
+        if (!isServer || GameEnded) return;
+
+        if (serv == null) serv = FindObjectOfType<Server>();
+
+        EndGameMessage endMsg;
+
+        if (TeamHealth <= 0)
+        {
+            //Send a broadcast to the players to finish the game due to the team dying.
+
+            endMsg = new EndGameMessage
+            {
+                networkId = 1,
+                teamEscaped = 0
+            };
+            serv.SendBroadcast(endMsg);
+            GameEnded = true;
+        }
+        else if (HasEscaped)
+        {
+            //Send a broadcast to the players to finish the game due to escaping.
+
+            endMsg = new EndGameMessage
+            {
+                networkId = 1,
+                teamEscaped = 1
+            };
+            serv.SendBroadcast(endMsg);
+            GameEnded = true;
+        }
+    }
+
+    public void FinishGame()
+    {
+        //THIS SHOULD ONLY BE CALLED BY A SERVER BROADCAST
+
+        if(TeamHealth > 0 && HasEscaped)
+        {
+            PersonalScore += 500; //bonus points for escaping
+        }
+
+        UIManager.instance.EndGameAndShowScore(HasEscaped, PersonalScore);
+    }
+
+    private void HandleDoorDetection()
+    {
+        int numberOfDoorsAround = 0;
+
+        foreach(DungeonExit door in GameManager.instance.dungeonExits)
+        {
+            if (door.LookForNearbyPlayer(playerLocation))
+            {
+                numberOfDoorsAround++;
+            }
+        }
+
+        if(numberOfDoorsAround > 0)
+        {
+            //WE CAN LEAVE! (For now we instantly leave the dungeon when we get close to an exit)
+            HasEscaped = true;
         }
     }
 

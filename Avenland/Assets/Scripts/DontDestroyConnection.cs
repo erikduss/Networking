@@ -68,6 +68,6 @@ public class DontDestroyConnection : MonoBehaviour
     public void SwitchToScene(int sceneID, int seed)
     {
         seedSetter.SetNewSeed(seed);
-        SceneManager.LoadScene(sceneID);
+        SceneManager.LoadScene("GameScene");
     }
 }

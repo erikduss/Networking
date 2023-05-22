@@ -65,11 +65,16 @@ public class EnemyController : MonoBehaviour
         visualizingDetection = false;
     }
 
-    public void LookForNearbyPlayer(Vector2 playerLocation)
+    public bool LookForNearbyPlayer(Vector2 playerLocation)
     {
         if (Vector2.Distance(enemyLocation, playerLocation) <= sightRange)
         {
             Debug.Log("In Enemy Sight, distance meter");
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 

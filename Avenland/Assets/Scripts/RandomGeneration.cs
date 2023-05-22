@@ -18,7 +18,7 @@ public class RandomGeneration : MonoBehaviour
     [SerializeField] private List<GameObject> floorTiles = new List<GameObject>();
 
     //Walls
-    [SerializeField] private List<GameObject> doorways = new List<GameObject>();
+    [SerializeField] public List<GameObject> doorways = new List<GameObject>();
     public List<Vector2> doorLocations = new List<Vector2>(); 
 
     [SerializeField] private GameObject wall_top_left_corner;

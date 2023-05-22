@@ -28,6 +28,7 @@ public class GameManager : MonoBehaviour
     private int playerTurn = 0;
 
     public List<EnemyController> enemies = new List<EnemyController>();
+    public List<DungeonExit> dungeonExits = new List<DungeonExit>();
     private UIManager uiManager;
 
     private void Awake()
@@ -102,6 +103,12 @@ public class GameManager : MonoBehaviour
         levelGeneration.GenerateWalls(new Vector3(0, 0, 0), dungeonSizeX, dungeonSizeY);
 
         enemies = levelGeneration.GenerateEnemies(dungeonSizeX, dungeonSizeY, TeamController.instance.playerLocation);
+        
+        foreach(GameObject door in levelGeneration.doorways)
+        {
+            DungeonExit exitComp = door.GetComponent<DungeonExit>();
+            dungeonExits.Add(exitComp);
+        }
 
         //uiManager.SetPlayerHUD(settings.amountOfPlayers, settings.chosenSpecializations, settings.playerNames);
     }

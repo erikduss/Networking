@@ -30,6 +30,10 @@ public class LoginDatabase : MonoBehaviour
     public TMP_InputField registerPassword;
     public TMP_Text infoTextRegister;
 
+    [Header("Logged in User")]
+    public string LoggedInUsername;
+    
+
     void Awake()
     {
         //THERE CAN ONLY BE ONE INSTANCE OF THIS SCRIPT AT ONE TIME
@@ -160,7 +164,7 @@ public class LoginDatabase : MonoBehaviour
                 //playerscore = playerscore.Replace("hello", "");
                 //yourScore.playerScore.text = playerscore;
 
-                //MainMenu.username = username.text;
+                LoggedInUsername = loginName.text;
                 LoginSuccess();
             }
         }

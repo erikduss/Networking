@@ -34,7 +34,8 @@ namespace ChatClientExample {
         GAME_SPAWN,
         CLIENT_LOADED_GAME,
         CLIENT_END_TURN,
-        UPDATE_SWITCH_TURN
+        UPDATE_SWITCH_TURN,
+        END_GAME
     }
 
     public enum MessageType
@@ -73,7 +74,8 @@ namespace ChatClientExample {
             { NetworkMessageType.GAME_SPAWN,                typeof(GameSpawnMessage) },
             { NetworkMessageType.CLIENT_LOADED_GAME,        typeof(LoadedGameMessage) },
             { NetworkMessageType.CLIENT_END_TURN,           typeof(EndTurnMessage) },
-            { NetworkMessageType.UPDATE_SWITCH_TURN,        typeof(UpdateAndSwitchTurnMessage) }
+            { NetworkMessageType.UPDATE_SWITCH_TURN,        typeof(UpdateAndSwitchTurnMessage) },
+            { NetworkMessageType.END_GAME,                  typeof(EndGameMessage) }
         };
     }
 

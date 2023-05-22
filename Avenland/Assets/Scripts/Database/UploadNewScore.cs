@@ -11,6 +11,8 @@ public class UploadNewScore : MonoBehaviour
 
     public static UploadNewScore instance;
 
+    public bool uploadedScore = false;
+
     private void Awake()
     {
         if (instance != null)
@@ -23,7 +25,7 @@ public class UploadNewScore : MonoBehaviour
     public void AddPoints(int points)
     {
         currentPoints += points;
-        pointsText.text = "Score: " + currentPoints.ToString();
+        //pointsText.text = "Score: " + currentPoints.ToString();
     }
 
     public int GetPoints()
@@ -31,13 +33,15 @@ public class UploadNewScore : MonoBehaviour
         return currentPoints;
     }
 
-    public void UploadScore(int highscore)
+    public void UploadScore(int score)
     {
-        //StartCoroutine(UploadScoreToDatabase(MainMenu.username, highscore));
+         StartCoroutine(UploadScoreToDatabase(LoginDatabase.instance.LoggedInUsername, score));
     }
 
     IEnumerator UploadScoreToDatabase(string username, int score)
     {
+        uploadedScore = false;
+
         WWWForm form = new WWWForm();
         form.AddField("username", username);
         form.AddField("score", score);
@@ -50,6 +54,7 @@ public class UploadNewScore : MonoBehaviour
         }
         else
         {
+            uploadedScore = true;
             Debug.Log(www.downloadHandler.text);
         }
         currentPoints = 0;
