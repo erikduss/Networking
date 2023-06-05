@@ -42,6 +42,8 @@ public class UploadNewScore : MonoBehaviour
     {
         uploadedScore = false;
 
+        Debug.Log("SCOR GAINED:: " + score + " _ " + currentPoints);
+
         WWWForm form = new WWWForm();
         form.AddField("username", username);
         form.AddField("score", score);

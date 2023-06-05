@@ -24,7 +24,8 @@ public class TeamController : MonoBehaviour
     public Vector2 playerLocation;
 
     public int TeamHealth = 100;
-    public int PersonalScore = 0;
+    public int MaxHealth = 100;
+    public float PersonalScore = 0;
     public bool HasEscaped = false;
 
     public bool GameEnded = false;
@@ -43,6 +44,13 @@ public class TeamController : MonoBehaviour
     public List<NetworkedGamePlayer> players = new List<NetworkedGamePlayer>();
     private NetworkedGamePlayer localPlayer;
     private int amountOfExtraPlayers = 0;
+
+    private float serverCloseTime = 10f;
+    private bool closingServer = false;
+
+    private int enemyViewRangeDeduction = 0;
+    private int lootingRangeIncrease = 0;
+    private float pointsMultiplier = 0;
 
     private Server serv;
 
@@ -156,10 +164,11 @@ public class TeamController : MonoBehaviour
                 break;
         }
 
-        PersonalScore += 20; //get 20 points for each team move.
+        PersonalScore += (20 * pointsMultiplier); //get 20 points for each team move.
 
         HandleEnemyDetection();
         HandleDoorDetection();
+        HandleChestDetection();
 
         CheckTeamState();
     }
@@ -174,7 +183,7 @@ public class TeamController : MonoBehaviour
             {
                 numberOfEnemiesAround++;
 
-                PersonalScore += 50; //Get 50 points for getting hit by an enemy. (danger points)
+                PersonalScore += (50 * pointsMultiplier); //Get 50 points for getting hit by an enemy. (danger points)
 
                 //if adding other types of enemies that do more dmg etc, add it onto a totaldamage int instead of number of enemies.
             }
@@ -186,6 +195,48 @@ public class TeamController : MonoBehaviour
             int damageTaken = numberOfEnemiesAround * 20;
             TeamHealth -= damageTaken;
             if (TeamHealth < 0) TeamHealth = 0;
+
+            UIManager.instance.UpdateHealth(TeamHealth, MaxHealth);
+        }
+    }
+
+    private void HandleChestDetection()
+    {
+        int numberOfChestsAround = 0;
+
+        List<DungeonChestController> chestsToDestroy = new List<DungeonChestController>(); ;
+
+        foreach (DungeonChestController chest in GameManager.instance.chests)
+        {
+            if (chest.LookForNearbyPlayer(playerLocation))
+            {
+                numberOfChestsAround++;
+
+                Debug.Log("GOT CHEST!");
+
+                PersonalScore += (250 * pointsMultiplier);
+
+                chestsToDestroy.Add(chest);
+
+                //if adding other types of enemies that do more dmg etc, add it onto a totaldamage int instead of number of enemies.
+            }
+        }
+
+        if (numberOfChestsAround > 0)
+        {
+            //WE'RE TAKING DAMAGE!
+            int damageTaken = numberOfChestsAround * 25;
+            TeamHealth += damageTaken;
+            if (TeamHealth > MaxHealth) TeamHealth = MaxHealth;
+
+            UIManager.instance.UpdateHealth(TeamHealth, MaxHealth);
+
+            for(int i=0; i < numberOfChestsAround; i++)
+            {
+                Debug.Log("Destroy chest");
+                GameManager.instance.chests.Remove(chestsToDestroy[i]);
+                Destroy(chestsToDestroy[i].gameObject);
+            }
         }
     }
 
@@ -221,6 +272,15 @@ public class TeamController : MonoBehaviour
             serv.SendBroadcast(endMsg);
             GameEnded = true;
         }
+
+        if (!closingServer && GameEnded) StartCoroutine(CloseServer());
+    }
+
+    private IEnumerator CloseServer()
+    {
+        closingServer = true;
+        yield return new WaitForSeconds(serverCloseTime);
+        UIManager.instance.ReturnToMenu();
     }
 
     public void FinishGame()
@@ -229,17 +289,17 @@ public class TeamController : MonoBehaviour
 
         if(TeamHealth > 0 && HasEscaped)
         {
-            PersonalScore += 500; //bonus points for escaping
+            PersonalScore += (500 * pointsMultiplier); //bonus points for escaping
         }
 
-        UIManager.instance.EndGameAndShowScore(HasEscaped, PersonalScore);
+        UIManager.instance.EndGameAndShowScore(HasEscaped, Mathf.RoundToInt(PersonalScore));
     }
 
     private void HandleDoorDetection()
     {
         int numberOfDoorsAround = 0;
 
-        foreach(DungeonExit door in GameManager.instance.dungeonExits)
+        foreach(DungeonExit door in GameManager.instance.generatedExits)
         {
             if (door.LookForNearbyPlayer(playerLocation))
             {
@@ -259,7 +319,12 @@ public class TeamController : MonoBehaviour
         GameObject spec;
         amountOfExtraPlayers = 0;
 
-        foreach(NetworkedGamePlayer player in players)
+        TeamHealth = 100;
+        enemyViewRangeDeduction = 0;
+        lootingRangeIncrease = 0;
+        pointsMultiplier = 1;
+
+        foreach (NetworkedGamePlayer player in players)
         {
             if (player.isLocal || amountOfExtraPlayers >= 4)//The server wont spawn a local
             {
@@ -280,6 +345,46 @@ public class TeamController : MonoBehaviour
 
                 UIManager.instance.SetPlayerHUD(amountOfExtraPlayers, player.selectedSpecialization, player.playerName);
             }
+
+            switch (player.selectedSpecialization)
+            {
+                case SpecializationType.Warrior:
+                    TeamHealth += 200;
+                    enemyViewRangeDeduction -= 1;
+                    break;
+                case SpecializationType.Mage:
+                    TeamHealth -= 50;
+                    enemyViewRangeDeduction += 2;
+                    pointsMultiplier += 0.1f;
+                    break;
+                case SpecializationType.Rogue:
+                    lootingRangeIncrease += 2;
+                    enemyViewRangeDeduction += 1;
+                    pointsMultiplier += 0.2f;
+                    break;
+                case SpecializationType.Shaman:
+                    TeamHealth += 100;
+                    enemyViewRangeDeduction += 1;
+                    lootingRangeIncrease -= 1;
+                    pointsMultiplier -= 0.1f;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        MaxHealth = TeamHealth;
+
+        foreach (EnemyController enemy in GameManager.instance.enemies)
+        {
+            enemy.sightRange -= enemyViewRangeDeduction;
+            enemy.UpdateSight();
+        }
+
+        foreach (DungeonChestController chest in GameManager.instance.chests)
+        {
+            chest.sightRange += lootingRangeIncrease;
+            chest.UpdateSight();
         }
     }
 

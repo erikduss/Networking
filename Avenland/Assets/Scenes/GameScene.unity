@@ -235,8 +235,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dungeonSizeX: 0
   dungeonSizeY: 0
+  chests: []
   enemies: []
   dungeonExits: []
+  generatedExits: []
 --- !u!4 &139791837
 Transform:
   m_ObjectHideFlags: 0
@@ -830,6 +832,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   amountOfDoors: 0
   amountOfEnemies: 0
+  amountOfChests: 0
+  chestPrefab: {fileID: 1017700345110751954, guid: a9dc4794f3e12a74fbc30af90dec8aa8, type: 3}
+  generatedChests: []
   floorTiles:
   - {fileID: 8910507344500633178, guid: 645e4d302fe0ee04ea090d46c3cd9a80, type: 3}
   - {fileID: 9192147573422793539, guid: 9227303010712934b9f436751b83e084, type: 3}
@@ -840,6 +845,7 @@ MonoBehaviour:
   - {fileID: 2300520070066052169, guid: 299dd22d5be72a344a9c5a097abf53fc, type: 3}
   - {fileID: 6323888387761183341, guid: 669b2aedab489a44a8fbc463b59a60ff, type: 3}
   - {fileID: 642488140649552132, guid: b104d6d17eecc8b4cb286056ef3b5b16, type: 3}
+  generatedDoorways: []
   doorLocations: []
   wall_top_left_corner: {fileID: 450800715453468319, guid: 2e325aa318117d94e98dc4925f8b972b, type: 3}
   wall_top_right_corner: {fileID: 2879899980889329628, guid: 249c29ad3c6e5b948bf478569fa4d485, type: 3}
@@ -4025,6 +4031,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerLocation: {x: 0, y: 0}
   TeamHealth: 100
+  MaxHealth: 100
   PersonalScore: 0
   HasEscaped: 0
   GameEnded: 0

@@ -54,6 +54,16 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    public void UpdateHealth(int currentHealth, int maxHealth)
+    {
+        float val = (float)currentHealth / (float)maxHealth;
+
+        foreach(Slider healthBars in playerHealthSliders)
+        {
+            healthBars.value = val;
+        }
+    }
+
     public void SetPlayerHUD(int playerID, SpecializationType spec, string playerName)
     {
         EnablePlayerHUD(playerID);
@@ -108,7 +118,7 @@ public class UIManager : MonoBehaviour
 
     public void ShowHighScores()
     {
-
+        Application.OpenURL("https://studenthome.hku.nl/~erik.dusschooten/Homework/Jaar_2_Kernmodule_4/DatabaseConnectie/highscores.php");
     }
 
     public void EndGameAndShowScore(bool hasEscaped, int score)
@@ -128,11 +138,5 @@ public class UIManager : MonoBehaviour
         }
 
         UploadNewScore.instance.UploadScore(score);
-
-        //TODO NEXT TIME!!!!!!!
-        //Update query from cyberduck to this!
-        //UPDATE `UsersLogin` SET `lastplayed`= CURRENT_DATE WHERE `username` = 'Erikduss'
-        //otherwise it will give an error and not update the score.
-        //PLUS, the score uploaded is not being checked to if its a highscore or not, it always overrites the last score.
     }
 }

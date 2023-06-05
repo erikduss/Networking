@@ -27,8 +27,11 @@ public class GameManager : MonoBehaviour
     private int playerID = 0;
     private int playerTurn = 0;
 
+    public List<DungeonChestController> chests = new List<DungeonChestController>();
     public List<EnemyController> enemies = new List<EnemyController>();
     public List<DungeonExit> dungeonExits = new List<DungeonExit>();
+
+    public List<DungeonExit> generatedExits = new List<DungeonExit>();
     private UIManager uiManager;
 
     private void Awake()
@@ -96,6 +99,7 @@ public class GameManager : MonoBehaviour
         levelGeneration.amountOfDoors = ((int)settings.dungeonSize + 1) * 2;
 
         levelGeneration.amountOfEnemies = ((int)settings.dungeonSize + 1) * 2;
+        levelGeneration.amountOfChests = ((int)settings.dungeonSize + 1) * 2;
 
         levelGeneration.PickDoorwayLocations(dungeonSizeX, dungeonSizeY);
 
@@ -103,11 +107,13 @@ public class GameManager : MonoBehaviour
         levelGeneration.GenerateWalls(new Vector3(0, 0, 0), dungeonSizeX, dungeonSizeY);
 
         enemies = levelGeneration.GenerateEnemies(dungeonSizeX, dungeonSizeY, TeamController.instance.playerLocation);
-        
-        foreach(GameObject door in levelGeneration.doorways)
+
+        chests = levelGeneration.GenerateChests(dungeonSizeX, dungeonSizeY, TeamController.instance.playerLocation);
+
+        foreach (GameObject door in levelGeneration.generatedDoorways)
         {
             DungeonExit exitComp = door.GetComponent<DungeonExit>();
-            dungeonExits.Add(exitComp);
+            generatedExits.Add(exitComp);
         }
 
         //uiManager.SetPlayerHUD(settings.amountOfPlayers, settings.chosenSpecializations, settings.playerNames);

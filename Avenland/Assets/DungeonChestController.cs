@@ -2,13 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyController : MonoBehaviour
+public class DungeonChestController : MonoBehaviour
 {
     [SerializeField] public int sightRange;
-    [SerializeField] private int health;
-
-    private GameManager gameManager;
-    public Vector2 enemyLocation;
+    public Vector2 chestLocation;
 
     private GameObject detectionRangeVisualizer;
 
@@ -18,15 +15,13 @@ public class EnemyController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        gameManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameManager>();
-
-        enemyLocation = new Vector2(transform.position.x / 1.28f, transform.position.y / 1.28f);
+        chestLocation = new Vector2(transform.position.x / 1.28f, transform.position.y / 1.28f);
 
         detectionRangeVisualizer = transform.GetChild(0).gameObject;
 
         //adjust the visual indicator to match the detection range
         detectionRangeVisualizer.transform.localScale = new Vector3(0, 0, 0);
-        sightVisualizationMaxSize = 25.6f * sightRange;
+        sightVisualizationMaxSize = 2.56f * sightRange;
     }
 
     // Update is called once per frame
@@ -40,7 +35,7 @@ public class EnemyController : MonoBehaviour
 
     public void UpdateSight()
     {
-        sightVisualizationMaxSize = 25.6f * sightRange;
+        sightVisualizationMaxSize = 2.56f * sightRange;
     }
 
     private IEnumerator VisualizeDetectionRange(float time)
@@ -72,9 +67,8 @@ public class EnemyController : MonoBehaviour
 
     public bool LookForNearbyPlayer(Vector2 playerLocation)
     {
-        if (Vector2.Distance(enemyLocation, playerLocation) <= sightRange)
+        if (Vector2.Distance(chestLocation, playerLocation) <= sightRange)
         {
-            Debug.Log("In Enemy Sight, distance meter");
             return true;
         }
         else
@@ -82,10 +76,4 @@ public class EnemyController : MonoBehaviour
             return false;
         }
     }
-
-    //void OnDrawGizmos()
-    //{
-    //    Gizmos.color = Color.red;
-    //    Gizmos.DrawSphere(transform.position, (sightRange*1.28f));
-    //}
 }

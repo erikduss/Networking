@@ -13,12 +13,18 @@ public class RandomGeneration : MonoBehaviour
 
     private int minDistanceBetweenEnemies = 10;
     public int amountOfEnemies = 0;
+    public int amountOfChests = 0;
+    private int minDistanceBetweenChests = 10;
+
+    [SerializeField] private GameObject chestPrefab;
+    public List<DungeonChestController> generatedChests = new List<DungeonChestController>();
 
     //Floor Tiles
     [SerializeField] private List<GameObject> floorTiles = new List<GameObject>();
 
     //Walls
     [SerializeField] public List<GameObject> doorways = new List<GameObject>();
+    public List<GameObject> generatedDoorways = new List<GameObject>();
     public List<Vector2> doorLocations = new List<Vector2>(); 
 
     [SerializeField] private GameObject wall_top_left_corner;
@@ -160,7 +166,8 @@ public class RandomGeneration : MonoBehaviour
 
             Doorway.transform.position = new Vector3(wallTileParent.transform.position.x + (loc.x * multiplierX), wallTileParent.transform.position.y + (loc.y * multiplierY), 0);
 
-            GameObject.Instantiate(Doorway, Doorway.transform.position, Quaternion.identity, wallTileParent.transform);
+            GameObject spawnedDoorway = GameObject.Instantiate(Doorway, Doorway.transform.position, Quaternion.identity, wallTileParent.transform);
+            generatedDoorways.Add(spawnedDoorway);
         }
     }
 
@@ -443,6 +450,59 @@ public class RandomGeneration : MonoBehaviour
                 }
             }
         }
+    }
+
+    public List<DungeonChestController> GenerateChests(float lengthX, float lengthY, Vector2 playerLocation)
+    {
+        List<DungeonChestController> tempChestList = new List<DungeonChestController>();
+
+        GameObject ChestParent = new GameObject { name = "ChestParent" };
+        ChestParent.transform.position = Vector3.zero;
+
+        for (int i = 0; i < amountOfChests; i++)
+        {
+            int randX = (int)Random.Range(3, (lengthX - 3));
+            int randY = (int)Random.Range(3, (lengthY - 3));
+
+            bool canSpawnOnPickedLocation = true;
+
+            if (Mathf.Abs(playerLocation.x - randX) < (minDistanceBetweenChests / 2) && Mathf.Abs(playerLocation.y - -randY) < (minDistanceBetweenChests / 2))
+            {
+                canSpawnOnPickedLocation = false;
+            }
+
+            if (tempChestList.Count > 0)
+            {
+                foreach (DungeonChestController chest in tempChestList)
+                {
+                    if (Mathf.Abs(chest.chestLocation.x - randX) < minDistanceBetweenChests && Mathf.Abs(chest.chestLocation.y - randY) < minDistanceBetweenChests)
+                    {
+                        canSpawnOnPickedLocation = false;
+                    }
+                }
+            }
+
+            if (canSpawnOnPickedLocation)
+            {
+                GameObject tempChest = chestPrefab;
+                tempChest.name = "Chest_" + i;
+
+                DungeonChestController chestCont = tempChest.GetComponent<DungeonChestController>();
+                chestCont.chestLocation = new Vector2(randX, randY);
+
+                tempChest.transform.position = new Vector3((randX * 1.28f), (randY * -1.28f), 0);
+
+                GameObject objToAdd = GameObject.Instantiate(tempChest, tempChest.transform.position, Quaternion.identity, ChestParent.transform);
+
+                tempChestList.Add(objToAdd.GetComponent<DungeonChestController>());
+            }
+            else
+            {
+                i--;
+            }
+        }
+
+        return tempChestList;
     }
 
     public List<EnemyController> GenerateEnemies(float lengthX, float lengthY, Vector2 playerLocation)

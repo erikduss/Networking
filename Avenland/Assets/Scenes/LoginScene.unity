@@ -430,6 +430,7 @@ MonoBehaviour:
   registerName: {fileID: 1789251566}
   registerPassword: {fileID: 1024023884}
   infoTextRegister: {fileID: 959272156}
+  LoggedInUsername: 
 --- !u!4 &201187706
 Transform:
   m_ObjectHideFlags: 0

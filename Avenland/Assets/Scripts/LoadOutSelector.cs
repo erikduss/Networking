@@ -35,16 +35,16 @@ public class LoadOutSelector : MonoBehaviour
         switch (selectedSpec)
         {
             case SpecializationType.Warrior:
-                infoText.text = "Warriors come equiped with heavy armor and deal medium damage. They're specialized in being able to block lots of incoming damage and taunting enemies to divert damage away from allies.";
+                infoText.text = "Warriors are specialized in being able to block lots of incoming damage and taunting enemies (Health +++ & Enemy detection prevention -)";
                 break;
             case SpecializationType.Mage:
-                infoText.text = "Mages are strong against groups of enemies, they're able to hit multiple enemies at once and slow down enemies. They deal a lot of damage but are only able to wear light armor";
+                infoText.text = "Mages are not as well protected, but they are great at distracting enemies. (Health -- & Enemy detection prevention +++ & XP ++)";
                 break;
             case SpecializationType.Rogue:
-                infoText.text = "Rogues are specialized in dealing high damage while using medium weight armor and revealing enemies & treasures.";
+                infoText.text = "Rogues are specialized in revealing enemies & treasures. (Enemy detection prevention + & XP +++ & Luck +++)";
                 break;
             case SpecializationType.Shaman:
-                infoText.text = "Shamans are specialized in healing and buffing group members while being able to deal medium damage and medium armor.";
+                infoText.text = "Shamans are specialized in protecting their team at the cost of resources. (Health ++ & Enemy detection prevention + & XP - & Luck -)";
                 break;
             default:
                 infoText.text = "Select a specialization for more information about the them.";

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class DungeonExit : MonoBehaviour
 {
-    private float checkRange = 1.5f;
+    private float checkRange = 2.5f;
 
     private GameManager gameManager;
     public Vector2 doorLocation;
@@ -25,9 +25,10 @@ public class DungeonExit : MonoBehaviour
 
     public bool LookForNearbyPlayer(Vector2 playerLocation)
     {
+        Debug.Log(Vector2.Distance(doorLocation, playerLocation));
+
         if (Vector2.Distance(doorLocation, playerLocation) <= checkRange)
         {
-            Debug.Log("Close enough to door!");
             return true;
         }
         else
