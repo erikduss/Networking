@@ -9,7 +9,10 @@
 		exit();
 	}
 
-	if(!filter_var($username, FILTER_SANITIZE_STRING) || !filter_var($password, FILTER_SANITIZE_URL)){
+	$filteredUsername = filter_var($username, FILTER_SANITIZE_STRING);
+	$filteredPassword = filter_var($password, FILTER_SANITIZE_URL);
+
+	if($filteredUsername != $username || $filteredPassword != $password){
 		echo "0 ERROR: Contains not allowed characters.";
 		exit();
 	}
