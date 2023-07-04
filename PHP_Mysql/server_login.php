@@ -4,7 +4,7 @@
 	$id = $_GET["id"];
 	$pw = $_GET["pw"];
 
-	$filteredUsername = filter_var($id, FILTER_SANITIZE_STRING);
+	$filteredUsername = filter_var($id, FILTER_SANITIZE_NUMBER_INT);
 	$filteredPassword = filter_var($pw, FILTER_SANITIZE_URL);
 
 	if($filteredUsername != $id || $filteredPassword != $pw){
@@ -20,6 +20,12 @@
 	$row = $result->fetch_assoc();
 
 	if(mysqli_num_rows($result) == 1){
+		//Set the session id if its included in the url
+		if (isset($_GET['PHPSESSID'])) {
+			$sid=htmlspecialchars($_GET['PHPSESSID'])
+			session_id($sid);
+		}
+
 		session_start();
 
 		$_SESSION['server_id'] = $row["id"];

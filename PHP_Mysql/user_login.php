@@ -4,6 +4,12 @@
 	$username = $_POST["username"];
 	$password = $_POST["pw"];
 
+	//Check if the session is valid
+	if (!isset($_SESSION["server_id"]) || $_SESSION["server_id"]==0) {
+		echo "0 ERROR: Login session expired";
+		exit();
+	}
+
 	if(!isset($username) || !isset($password)){
 		echo "0 ERROR: No username or password received.";
 		exit();

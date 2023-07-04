@@ -4,6 +4,12 @@
 	$playerusername = $_SESSION['username'];
 	$newscore = $_POST['score'];
 
+	//Check if the session is valid
+	if (!isset($_SESSION["server_id"]) || $_SESSION["server_id"]==0) {
+		echo "0 ERROR: Login session expired";
+		exit();
+	}
+
 	if(empty($playerusername)){
 		echo "0 ERROR: You are not logged in! Log in here: https://studenthome.hku.nl/~erik.dusschooten/Homework/Jaar_2_Kernmodule_4/DatabaseConnectie/UserLoginWeb.php";
 		exit();
